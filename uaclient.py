@@ -27,8 +27,9 @@ class UaClient(object):
         print(self.get_root_attrs())
 
     def disconnect(self):
-        print("Disconnecting from server")
-        self.client.disconnect()
+        if self.client:
+            print("Disconnecting from server")
+            self.client.disconnect()
 
     def browse(self, nodeid):
         """
@@ -41,10 +42,18 @@ class UaClient(object):
     def get_node_attrs(self, node):
         if not type(node) is Node:
             node = self.client.get_node(node)
-        attrs = node.get_attributes([AttributeIds.DisplayName, AttributeIds.NodeId, AttributeIds.NodeClass])
+        attrs = node.get_attributes([AttributeIds.DisplayName, AttributeIds.NodeId, AttributeIds.BrowseName])
         #return [dv.Value.Value for dv in attrs]
-        vals =  [dv.Value.Value for dv in attrs]
+        vals = [dv.Value.Value for dv in attrs]
         vals[0] = vals[0].Text
-        return vals
+        return [node] + vals
+
+    def get_children(self, node):
+        descs = node.get_children_descriptions()
+        children = []
+        for desc in descs:
+            children.append([self.client.get_node(desc.NodeId), desc.DisplayName.Text, desc.NodeId, desc.BrowseName])
+        print(children)
+        return children
 
 

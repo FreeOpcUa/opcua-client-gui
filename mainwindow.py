@@ -21,8 +21,9 @@ class Window(QtGui.QMainWindow):
         # init widgets
         self.ui.addrLineEdit.setText("opc.tcp://localhost:4841/")
         self.ui.treeView.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
-        self.model = QtGui.QStandardItemModel()
-        self.model.setHorizontalHeaderLabels(['col1', 'col2', 'col3'])
+        #self.model = QtGui.QStandardItemModel()
+        self.model = MyModel(self)
+        self.model.setHorizontalHeaderLabels(['Name', 'NodeId', 'NodeClass'])
         self.ui.treeView.setModel(self.model)
         self.ui.treeView.setUniformRowHeights(True)
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -53,12 +54,6 @@ class Window(QtGui.QMainWindow):
         self.ui.disconnectButton.clicked.connect(self._disconnect)
         self.ui.treeView.expanded.connect(self._expanded)
 
-    def _add_modelitem(self, attrs, idx=None):
-        #parent = self.model.itemFromIndex(idx)
-        print(attrs)
-        data = [QtGui.QStandardItem(str(attr)) for attr in attrs]
-        return self.model.appendRow(data)
-        #return parent.insertRow(data)
 
     def _expanded(self, idx):
         print("expanded ", idx)
@@ -66,12 +61,64 @@ class Window(QtGui.QMainWindow):
     def _connect(self):
         uri = self.ui.addrLineEdit.text()
         self.uaclient.connect(uri)
-        self._add_modelitem(self.uaclient.get_root_attrs())
+        self.model.client = self.uaclient
+        self.model.add_item(self.uaclient.get_root_attrs())
 
     def _disconnect(self):
         self.uaclient.disconnect()
+        self.model.clear()
+        self.model.client = None
+
+    def closeEvent(self, event):
+        self._disconnect()
+        event.accept()
 
 
+class MyModel(QtGui.QStandardItemModel):
+    def __init__(self, parent):
+        super(MyModel, self).__init__(parent)
+        self.client = None
+        self._fetched = [] 
+
+    def add_item(self, attrs, parent=None):
+        print("add item ", attrs, " to ", parent)
+        data = [QtGui.QStandardItem(str(attr)) for attr in attrs[1:]]
+        data[0].setData(attrs[0])
+        if parent:
+            return parent.appendRow(data)
+        else:
+            print("adding: ", data)
+            return self.appendRow(data)
+
+    def canFetchMore(self, idx):
+        item = self.itemFromIndex(idx)
+        if not item:
+            return True
+        node = item.data()
+        if node not in self._fetched:
+            self._fetched.append(node)
+            return True
+        return False
+
+    def hasChildren(self, idx):
+        item = self.itemFromIndex(idx)
+        if not item:
+            return True
+        node = item.data()
+        if node in self._fetched:
+            return QtGui.QStandardItemModel.hasChildren(self, idx)
+        return True
+
+    def fetchMore(self, idx):
+        print("Fetch more", idx)
+
+        parent = self.itemFromIndex(idx)
+        print(parent)
+        if not parent:
+            print("No item for ids: ", idx)
+        else:
+            for attrs in self.client.get_children(parent.data()):
+                self.add_item(attrs, parent)
 
 
 if __name__ == "__main__":
