@@ -1,4 +1,4 @@
 all:
-	pyside-uic uaclient_ui.ui -o uaclient_ui.py
+	pyside-uic mainwindow_ui.ui -o mainwindow_ui.py
 run:
-	python3 uaclient.py
+	python3 mainwindow.py
