@@ -33,6 +33,10 @@ class Window(QtGui.QMainWindow):
         self.ui.disconnectButton.clicked.connect(self._disconnect)
         self.ui.treeView.activated.connect(self._show_attrs_and_refs)
         self.ui.treeView.clicked.connect(self._show_attrs_and_refs)
+        self.ui.treeView.expanded.connect(self._fit)
+
+    def _fit(self, idx):
+        self.ui.treeView.resizeColumnToContents(0)
 
     def _show_attrs_and_refs(self, idx):
         print("Activated", idx)
@@ -46,8 +50,11 @@ class Window(QtGui.QMainWindow):
         attrs = self.uaclient.get_all_node_attrs(node) 
         print("attrs : ", attrs)
         self.attr_model.clear()
+        self.model.setHorizontalHeaderLabels(['Name', 'NodeId', 'NodeClass'])
         for k, v in attrs.items():
             self.attr_model.appendRow([QtGui.QStandardItem(k), QtGui.QStandardItem(str(v))])
+        self.ui.attrView.resizeColumnToContents(0)
+        self.ui.attrView.resizeColumnToContents(1)
 
     def _connect(self):
         self._disconnect()
@@ -55,10 +62,14 @@ class Window(QtGui.QMainWindow):
         self.uaclient.connect(uri)
         self.model.client = self.uaclient
         self.model.add_item(self.uaclient.get_root_attrs())
+        self.ui.treeView.resizeColumnToContents(0)
+        self.ui.treeView.resizeColumnToContents(1)
+        self.ui.treeView.resizeColumnToContents(2)
 
     def _disconnect(self):
         self.uaclient.disconnect()
         self.model.clear()
+        self.model.setHorizontalHeaderLabels(['Name', 'NodeId', 'NodeClass'])
         self.model.client = None
 
     def closeEvent(self, event):
