@@ -41,15 +41,15 @@ class UaClient(object):
             node = self.client.get_node(node)
         attrs = node.get_attributes([AttributeIds.BrowseName, AttributeIds.NodeId])
         #return [dv.Value.Value for dv in attrs]
-        vals = [dv.Value.Value for dv in attrs]
-        vals[0] = vals[0].to_string()
+        vals = [dv.Value.Value.to_string() for dv in attrs]
+        #vals[0] = vals[0].to_string()
         return [node] + vals
 
     def get_children(self, node):
         descs = node.get_children_descriptions()
         children = []
         for desc in descs:
-            children.append([self.client.get_node(desc.NodeId), desc.BrowseName.to_string(), desc.NodeId])
+            children.append([self.client.get_node(desc.NodeId), desc.BrowseName.to_string(), desc.NodeId.to_string()])
         return children
 
     def get_all_attrs(self, node):
