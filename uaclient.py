@@ -39,20 +39,20 @@ class UaClient(object):
     def get_node_attrs(self, node):
         if not type(node) is Node:
             node = self.client.get_node(node)
-        attrs = node.get_attributes([AttributeIds.DisplayName, AttributeIds.NodeId, AttributeIds.BrowseName])
+        attrs = node.get_attributes([AttributeIds.BrowseName, AttributeIds.NodeId])
         #return [dv.Value.Value for dv in attrs]
         vals = [dv.Value.Value for dv in attrs]
-        vals[0] = vals[0].Text
+        vals[0] = vals[0].to_string()
         return [node] + vals
 
     def get_children(self, node):
         descs = node.get_children_descriptions()
         children = []
         for desc in descs:
-            children.append([self.client.get_node(desc.NodeId), desc.DisplayName.Text, desc.NodeId, desc.BrowseName])
+            children.append([self.client.get_node(desc.NodeId), desc.BrowseName.to_string(), desc.NodeId])
         return children
 
-    def get_all_node_attrs(self, node):
+    def get_all_attrs(self, node):
         names = []
         vals = []
         for name, val in ua.AttributeIds.__dict__.items():
@@ -66,6 +66,11 @@ class UaClient(object):
             if attrs[idx].StatusCode.is_good():
                 res[name] = attrs[idx].Value.Value
         return res
+
+    def get_all_refs(self, node):
+        return node.get_children_descriptions(refs=ObjectIds.References)
+
+
 
 
 

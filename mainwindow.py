@@ -22,9 +22,11 @@ class Window(QtGui.QMainWindow):
         self.ui.addrLineEdit.setText("opc.tcp://localhost:4841/")
         self.ui.treeView.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
         self.attr_model = QtGui.QStandardItemModel()
-        self.model = MyModel(self)
+        self.refs_model = QtGui.QStandardItemModel()
         self.ui.attrView.setModel(self.attr_model)
-        self.model.setHorizontalHeaderLabels(['Name', 'NodeId', 'NodeClass'])
+        self.ui.refView.setModel(self.refs_model)
+        self.model = MyModel(self)
+        self.model.clear()
         self.ui.treeView.setModel(self.model)
         self.ui.treeView.setUniformRowHeights(True)
 
@@ -39,7 +41,6 @@ class Window(QtGui.QMainWindow):
         self.ui.treeView.resizeColumnToContents(0)
 
     def _show_attrs_and_refs(self, idx):
-        print("Activated", idx)
         it = self.model.itemFromIndex(idx)
         if not it:
             return
@@ -47,10 +48,27 @@ class Window(QtGui.QMainWindow):
         if not node:
             print("No node for item:", it, it.text()) 
             return
-        attrs = self.uaclient.get_all_node_attrs(node) 
-        print("attrs : ", attrs)
+        self._show_attrs(node)
+        self._show_refs(node)
+
+    def _show_refs(self, node):
+        self.refs_model.clear()
+        self.refs_model.setHorizontalHeaderLabels(['ReferenceType', 'NodeId', "BrowseName", "TypeDefinition"])
+        refs = self.uaclient.get_all_refs(node) 
+        for ref in refs:
+            self.refs_model.appendRow([QtGui.QStandardItem(str(ref.ReferenceTypeId)),
+                QtGui.QStandardItem(str(ref.NodeId)),
+                QtGui.QStandardItem(str(ref.BrowseName)),
+                QtGui.QStandardItem(str(ref.TypeDefinition))])
+        self.ui.refView.resizeColumnToContents(0)
+        self.ui.refView.resizeColumnToContents(1)
+        self.ui.refView.resizeColumnToContents(2)
+        self.ui.refView.resizeColumnToContents(3)
+
+    def _show_attrs(self, node):
+        attrs = self.uaclient.get_all_attrs(node) 
         self.attr_model.clear()
-        self.model.setHorizontalHeaderLabels(['Name', 'NodeId', 'NodeClass'])
+        self.attr_model.setHorizontalHeaderLabels(['Attribute', 'Value'])
         for k, v in attrs.items():
             self.attr_model.appendRow([QtGui.QStandardItem(k), QtGui.QStandardItem(str(v))])
         self.ui.attrView.resizeColumnToContents(0)
@@ -69,7 +87,6 @@ class Window(QtGui.QMainWindow):
     def _disconnect(self):
         self.uaclient.disconnect()
         self.model.clear()
-        self.model.setHorizontalHeaderLabels(['Name', 'NodeId', 'NodeClass'])
         self.model.client = None
 
     def closeEvent(self, event):
@@ -82,6 +99,10 @@ class MyModel(QtGui.QStandardItemModel):
         super(MyModel, self).__init__(parent)
         self.client = None
         self._fetched = [] 
+
+    def clear(self):
+        QtGui.QStandardItemModel.clear(self)
+        self.setHorizontalHeaderLabels(['Name', 'NodeId'])
 
     def add_item(self, attrs, parent=None):
         data = [QtGui.QStandardItem(str(attr)) for attr in attrs[1:]]
