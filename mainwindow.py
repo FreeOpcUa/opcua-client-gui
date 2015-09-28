@@ -26,28 +26,6 @@ class Window(QtGui.QMainWindow):
         self.model.setHorizontalHeaderLabels(['Name', 'NodeId', 'NodeClass'])
         self.ui.treeView.setModel(self.model)
         self.ui.treeView.setUniformRowHeights(True)
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        # populate data
-
-        #for i in range(3):
-            #parent1 =             for j in range(3):
-                #child1 = QtGui.QStandardItem('Child {}'.format(i*3+j))
-                #child2 = QtGui.QStandardItem('row: {}, col: {}'.format(i, j+1))
-                #child3 = QtGui.QStandardItem('row: {}, col: {}'.format(i, j+2))
-                #parent1.appendRow([child1, child2, child3])
-            #model.appendRow(parent1)
-            # span container columns
-            #self.ui.treeView.setFirstColumnSpanned(i, , True)
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        # expand third container
-        #index = model.indexFromItem(parent1)
-        #self.ui.treeView.expand(index)
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        # select last row
-        #selmod = self.ui.treeView.selectionModel()
-        #index2 = model.indexFromItem(child3)
-        #selmod.select(index2, QtGui.QItemSelectionModel.Select|QtGui.QItemSelectionModel.Rows)
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         self.uaclient = UaClient() 
         self.ui.connectButton.clicked.connect(self._connect)
@@ -59,6 +37,7 @@ class Window(QtGui.QMainWindow):
         print("expanded ", idx)
 
     def _connect(self):
+        self._disconnect()
         uri = self.ui.addrLineEdit.text()
         self.uaclient.connect(uri)
         self.model.client = self.uaclient
@@ -81,13 +60,11 @@ class MyModel(QtGui.QStandardItemModel):
         self._fetched = [] 
 
     def add_item(self, attrs, parent=None):
-        print("add item ", attrs, " to ", parent)
         data = [QtGui.QStandardItem(str(attr)) for attr in attrs[1:]]
         data[0].setData(attrs[0])
         if parent:
             return parent.appendRow(data)
         else:
-            print("adding: ", data)
             return self.appendRow(data)
 
     def canFetchMore(self, idx):
@@ -110,10 +87,7 @@ class MyModel(QtGui.QStandardItemModel):
         return True
 
     def fetchMore(self, idx):
-        print("Fetch more", idx)
-
         parent = self.itemFromIndex(idx)
-        print(parent)
         if not parent:
             print("No item for ids: ", idx)
         else:

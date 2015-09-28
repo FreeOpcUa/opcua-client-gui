@@ -18,9 +18,10 @@ class UaClient(object):
         self.client = None
 
     def connect(self, uri):
+        #if self.client:
+            #print("we are already connected, disconnecting from current server")
+            #self.client.disconnect()
         print("Connecting to ", uri)
-        if self.client:
-            self.client.disconnect()
         self.client = Client(uri)
         self.client.connect()
         print("Connected, root is: ", self.client.get_root_node())
@@ -30,6 +31,7 @@ class UaClient(object):
         if self.client:
             print("Disconnecting from server")
             self.client.disconnect()
+            self.client = None
 
     def browse(self, nodeid):
         """
@@ -53,7 +55,6 @@ class UaClient(object):
         children = []
         for desc in descs:
             children.append([self.client.get_node(desc.NodeId), desc.DisplayName.Text, desc.NodeId, desc.BrowseName])
-        print(children)
         return children
 
 
