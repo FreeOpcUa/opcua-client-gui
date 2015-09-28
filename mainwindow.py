@@ -21,8 +21,9 @@ class Window(QtGui.QMainWindow):
         # init widgets
         self.ui.addrLineEdit.setText("opc.tcp://localhost:4841/")
         self.ui.treeView.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
-        #self.model = QtGui.QStandardItemModel()
+        self.attr_model = QtGui.QStandardItemModel()
         self.model = MyModel(self)
+        self.ui.attrView.setModel(self.attr_model)
         self.model.setHorizontalHeaderLabels(['Name', 'NodeId', 'NodeClass'])
         self.ui.treeView.setModel(self.model)
         self.ui.treeView.setUniformRowHeights(True)
@@ -30,11 +31,23 @@ class Window(QtGui.QMainWindow):
         self.uaclient = UaClient() 
         self.ui.connectButton.clicked.connect(self._connect)
         self.ui.disconnectButton.clicked.connect(self._disconnect)
-        self.ui.treeView.expanded.connect(self._expanded)
+        self.ui.treeView.activated.connect(self._show_attrs_and_refs)
+        self.ui.treeView.clicked.connect(self._show_attrs_and_refs)
 
-
-    def _expanded(self, idx):
-        print("expanded ", idx)
+    def _show_attrs_and_refs(self, idx):
+        print("Activated", idx)
+        it = self.model.itemFromIndex(idx)
+        if not it:
+            return
+        node = it.data()
+        if not node:
+            print("No node for item:", it, it.text()) 
+            return
+        attrs = self.uaclient.get_all_node_attrs(node) 
+        print("attrs : ", attrs)
+        self.attr_model.clear()
+        for k, v in attrs.items():
+            self.attr_model.appendRow([QtGui.QStandardItem(k), QtGui.QStandardItem(str(v))])
 
     def _connect(self):
         self._disconnect()

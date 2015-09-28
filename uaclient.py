@@ -33,11 +33,6 @@ class UaClient(object):
             self.client.disconnect()
             self.client = None
 
-    def browse(self, nodeid):
-        """
-        """
-        pass
-
     def get_root_attrs(self):
         return self.get_node_attrs(self.client.get_root_node())
 
@@ -56,5 +51,21 @@ class UaClient(object):
         for desc in descs:
             children.append([self.client.get_node(desc.NodeId), desc.DisplayName.Text, desc.NodeId, desc.BrowseName])
         return children
+
+    def get_all_node_attrs(self, node):
+        names = []
+        vals = []
+        for name, val in ua.AttributeIds.__dict__.items():
+            if not name.startswith("_"):
+                names.append(name)
+                vals.append(val)
+
+        attrs = node.get_attributes(vals)
+        res = {}
+        for idx, name in enumerate(names):
+            if attrs[idx].StatusCode.is_good():
+                res[name] = attrs[idx].Value.Value
+        return res
+
 
 
