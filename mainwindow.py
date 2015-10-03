@@ -18,7 +18,18 @@ class Window(QtGui.QMainWindow):
         QtGui.QMainWindow.__init__(self)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+
+        #fix stuff imposible to do in qtdesigner
+        #remove dock titlebar for addressbar
+        w = QtGui.QWidget()
+        self.ui.addrDockWidget.setTitleBarWidget(w)
+        #tabify some docks
+        self.tabifyDockWidget(self.ui.evDockWidget, self.ui.subDockWidget)
+        self.tabifyDockWidget(self.ui.subDockWidget, self.ui.refDockWidget)
+
+
         # init widgets
+        self.ui.statusBar.hide()
         self.ui.addrLineEdit.setText("opc.tcp://localhost:4841/")
         self.ui.treeView.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
         self.attr_model = QtGui.QStandardItemModel()
@@ -37,6 +48,13 @@ class Window(QtGui.QMainWindow):
         self.ui.treeView.clicked.connect(self._show_attrs_and_refs)
         self.ui.treeView.expanded.connect(self._fit)
 
+    def show_error(self, msg, level=1):
+        self.ui.statusBar.show()
+        self.ui.statusBar.setStyleSheet("QStatusBar { background-color : red; color : black; }")
+        #self.ui.statusBar.clear()
+        self.ui.statusBar.showMessage(str(msg))
+        QtCore.QTimer.singleShot(1500, self.ui.statusBar.hide)
+        
     def _fit(self, idx):
         self.ui.treeView.resizeColumnToContents(0)
 
@@ -77,7 +95,12 @@ class Window(QtGui.QMainWindow):
     def _connect(self):
         self._disconnect()
         uri = self.ui.addrLineEdit.text()
-        self.uaclient.connect(uri)
+        try:
+            self.uaclient.connect(uri)
+        except Exception as ex:
+            self.show_error(ex)
+            return
+
         self.model.client = self.uaclient
         self.model.add_item(self.uaclient.get_root_attrs())
         self.ui.treeView.resizeColumnToContents(0)
@@ -133,9 +156,7 @@ class MyModel(QtGui.QStandardItemModel):
 
     def fetchMore(self, idx):
         parent = self.itemFromIndex(idx)
-        if not parent:
-            print("No item for ids: ", idx)
-        else:
+        if parent:
             for attrs in self.client.get_children(parent.data()):
                 self.add_item(attrs, parent)
 

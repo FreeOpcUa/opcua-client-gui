@@ -16,6 +16,7 @@ class UaClient(object):
     """
     def __init__(self):
         self.client = None
+        self._connected = False
 
     def connect(self, uri):
         #if self.client:
@@ -24,11 +25,12 @@ class UaClient(object):
         print("Connecting to ", uri)
         self.client = Client(uri)
         self.client.connect()
+        self._connected = True
         print("Connected, root is: ", self.client.get_root_node())
         print(self.get_root_attrs())
 
     def disconnect(self):
-        if self.client:
+        if self._connected:
             print("Disconnecting from server")
             self.client.disconnect()
             self.client = None
