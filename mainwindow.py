@@ -38,6 +38,7 @@ class Window(QtGui.QMainWindow):
         self.ui.refView.setModel(self.refs_model)
         self.model = MyModel(self)
         self.model.clear()
+        self.model.error.connect(self.show_error)
         self.ui.treeView.setModel(self.model)
         self.ui.treeView.setUniformRowHeights(True)
 
@@ -72,19 +73,27 @@ class Window(QtGui.QMainWindow):
     def _show_refs(self, node):
         self.refs_model.clear()
         self.refs_model.setHorizontalHeaderLabels(['ReferenceType', 'NodeId', "BrowseName", "TypeDefinition"])
-        refs = self.uaclient.get_all_refs(node) 
+        try:
+            refs = self.uaclient.get_all_refs(node) 
+        except Exception as ex:
+            self.show_error(ex)
+            raise
         for ref in refs:
             self.refs_model.appendRow([QtGui.QStandardItem(str(ref.ReferenceTypeId)),
-                QtGui.QStandardItem(str(ref.NodeId)),
-                QtGui.QStandardItem(str(ref.BrowseName)),
-                QtGui.QStandardItem(str(ref.TypeDefinition))])
+                    QtGui.QStandardItem(str(ref.NodeId)),
+                    QtGui.QStandardItem(str(ref.BrowseName)),
+                    QtGui.QStandardItem(str(ref.TypeDefinition))])
         self.ui.refView.resizeColumnToContents(0)
         self.ui.refView.resizeColumnToContents(1)
         self.ui.refView.resizeColumnToContents(2)
         self.ui.refView.resizeColumnToContents(3)
 
     def _show_attrs(self, node):
-        attrs = self.uaclient.get_all_attrs(node) 
+        try:
+            attrs = self.uaclient.get_all_attrs(node) 
+        except Exception as ex:
+            self.show_error(ex)
+            raise
         self.attr_model.clear()
         self.attr_model.setHorizontalHeaderLabels(['Attribute', 'Value'])
         for k, v in attrs.items():
@@ -93,24 +102,29 @@ class Window(QtGui.QMainWindow):
         self.ui.attrView.resizeColumnToContents(1)
 
     def _connect(self):
-        self._disconnect()
         uri = self.ui.addrLineEdit.text()
         try:
             self.uaclient.connect(uri)
         except Exception as ex:
             self.show_error(ex)
-            return
+            raise
 
         self.model.client = self.uaclient
+        self.model.clear()
         self.model.add_item(self.uaclient.get_root_attrs())
         self.ui.treeView.resizeColumnToContents(0)
         self.ui.treeView.resizeColumnToContents(1)
         self.ui.treeView.resizeColumnToContents(2)
 
     def _disconnect(self):
-        self.uaclient.disconnect()
-        self.model.clear()
-        self.model.client = None
+        try:
+            self.uaclient.disconnect()
+        except Exception as ex:
+            self.show_error(ex)
+            raise
+        finally:
+            self.model.clear()
+            self.model.client = None
 
     def closeEvent(self, event):
         self._disconnect()
@@ -118,6 +132,9 @@ class Window(QtGui.QMainWindow):
 
 
 class MyModel(QtGui.QStandardItemModel):
+
+    error = QtCore.Signal(str)
+
     def __init__(self, parent):
         super(MyModel, self).__init__(parent)
         self.client = None
@@ -125,6 +142,7 @@ class MyModel(QtGui.QStandardItemModel):
 
     def clear(self):
         QtGui.QStandardItemModel.clear(self)
+        self._fetched = []
         self.setHorizontalHeaderLabels(['Name', 'NodeId'])
 
     def add_item(self, attrs, parent=None):
@@ -157,8 +175,16 @@ class MyModel(QtGui.QStandardItemModel):
     def fetchMore(self, idx):
         parent = self.itemFromIndex(idx)
         if parent:
+            self._fetchMore(parent)
+
+    def _fetchMore(self, parent):
+        try:
             for attrs in self.client.get_children(parent.data()):
                 self.add_item(attrs, parent)
+        except Exception as ex:
+            self.error.emit(ex)
+            raise
+
 
 
 if __name__ == "__main__":

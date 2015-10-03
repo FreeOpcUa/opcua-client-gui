@@ -19,9 +19,7 @@ class UaClient(object):
         self._connected = False
 
     def connect(self, uri):
-        #if self.client:
-            #print("we are already connected, disconnecting from current server")
-            #self.client.disconnect()
+        self.disconnect()
         print("Connecting to ", uri)
         self.client = Client(uri)
         self.client.connect()
@@ -32,6 +30,7 @@ class UaClient(object):
     def disconnect(self):
         if self._connected:
             print("Disconnecting from server")
+            self._connected = False
             self.client.disconnect()
             self.client = None
 
