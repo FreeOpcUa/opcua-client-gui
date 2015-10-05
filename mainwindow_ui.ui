@@ -52,6 +52,8 @@
     </property>
     <addaction name="actionConnect"/>
     <addaction name="actionDisconnect"/>
+    <addaction name="actionSubscribe"/>
+    <addaction name="actionUnsubscribe"/>
    </widget>
    <addaction name="menuOPC_UA_Client"/>
   </widget>
@@ -104,7 +106,13 @@
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
-   <widget class="QWidget" name="dockWidgetContents_3"/>
+   <widget class="QWidget" name="dockWidgetContents_3">
+    <layout class="QGridLayout" name="gridLayout_3">
+     <item row="0" column="0">
+      <widget class="QTableView" name="subView"/>
+     </item>
+    </layout>
+   </widget>
   </widget>
   <widget class="QDockWidget" name="refDockWidget">
    <property name="windowTitle">
@@ -141,6 +149,22 @@
    </property>
    <property name="toolTip">
     <string>disconnect from server</string>
+   </property>
+  </action>
+  <action name="actionSubscribe">
+   <property name="text">
+    <string>subscribe</string>
+   </property>
+   <property name="toolTip">
+    <string>Subscribe to selected node</string>
+   </property>
+  </action>
+  <action name="actionUnsubscribe">
+   <property name="text">
+    <string>unsubscribe</string>
+   </property>
+   <property name="toolTip">
+    <string>Unsubscribe to current node</string>
    </property>
   </action>
  </widget>

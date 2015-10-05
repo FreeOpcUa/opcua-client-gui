@@ -8,7 +8,6 @@ from opcua import ObjectIds
 from IPython import embed
 
 
-
 class UaClient(object):
     """
     OPC-Ua client specialized for the need of GUI client
@@ -17,6 +16,7 @@ class UaClient(object):
     def __init__(self):
         self.client = None
         self._connected = False
+        self._subscription = None
 
     def connect(self, uri):
         self.disconnect()
@@ -31,8 +31,14 @@ class UaClient(object):
         if self._connected:
             print("Disconnecting from server")
             self._connected = False
+            self._subscription = None
             self.client.disconnect()
             self.client = None
+
+    def subscribe(self, node, handler):
+        if not self._subscription:
+            self._subscription = self.client.create_subscription(500, handler)
+        self._subscription.subscribe_data_change(node)
 
     def get_root_attrs(self):
         return self.get_node_attrs(self.client.get_root_node())
@@ -40,17 +46,14 @@ class UaClient(object):
     def get_node_attrs(self, node):
         if not type(node) is Node:
             node = self.client.get_node(node)
-        attrs = node.get_attributes([AttributeIds.BrowseName, AttributeIds.NodeId])
-        #return [dv.Value.Value for dv in attrs]
-        vals = [dv.Value.Value.to_string() for dv in attrs]
-        #vals[0] = vals[0].to_string()
-        return [node] + vals
+        attrs = node.get_attributes([AttributeIds.DisplayName, AttributeIds.BrowseName, AttributeIds.NodeId])
+        return [node] + [attr.Value.Value.to_string() for attr in attrs] 
 
     def get_children(self, node):
         descs = node.get_children_descriptions()
         children = []
         for desc in descs:
-            children.append([self.client.get_node(desc.NodeId), desc.BrowseName.to_string(), desc.NodeId.to_string()])
+            children.append([self.client.get_node(desc.NodeId), desc.DisplayName.to_string(), desc.BrowseName.to_string(), desc.NodeId.to_string()])
         return children
 
     def get_all_attrs(self, node):
