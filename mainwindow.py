@@ -103,12 +103,17 @@ class Window(QtGui.QMainWindow):
         node = it.data()
         attrs = self.uaclient.get_node_attrs(node)
         self.sub_model.setHorizontalHeaderLabels(["DisplayName", "Browse Name", 'NodeId', "Value"])
-        it = self.sub_model.appendRow([QtGui.QStandardItem(attrs[1]),
+        item = QtGui.QStandardItem(attrs[1])
+        self.sub_model.appendRow([item,
                     QtGui.QStandardItem(attrs[2]),
                     QtGui.QStandardItem(attrs[3])
                     ])
-        print("IT is ", it)
-        handle = self.uaclient.subscribe(node, self._subhandler)
+        try:
+            handle = self.uaclient.subscribe(node, self._subhandler)
+        except Exception as ex:
+            self.show_error(ex)
+            idx = self.sub_model.indexFromItem(item)
+            self.sub_model.takeRow(idx.row())
 
     def unsubscribe(self):
         idx = self.model.currentIndex()
@@ -183,6 +188,7 @@ class Window(QtGui.QMainWindow):
             raise
         finally:
             self.model.clear()
+            self.sub_model.clear()
             self.model.client = None
 
     def closeEvent(self, event):
