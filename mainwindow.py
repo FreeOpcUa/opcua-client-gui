@@ -54,7 +54,8 @@ class Window(QtGui.QMainWindow):
 
         # init widgets
         self.ui.statusBar.hide()
-        self.ui.addrLineEdit.setText("opc.tcp://localhost:4841/")
+        self.ui.addrComboBox.insertItem(-1, "opc.tcp://localhost:4841/")
+        self.ui.addrComboBox.insertItem(1, "opc.tcp://localhost:53530/OPCUA/SimulationServer/")
 
         self.attr_model = QtGui.QStandardItemModel()
         self.refs_model = QtGui.QStandardItemModel()
@@ -166,7 +167,7 @@ class Window(QtGui.QMainWindow):
         self.ui.attrView.resizeColumnToContents(1)
 
     def _connect(self):
-        uri = self.ui.addrLineEdit.text()
+        uri = self.ui.addrComboBox.currentText()
         try:
             self.uaclient.connect(uri)
         except Exception as ex:

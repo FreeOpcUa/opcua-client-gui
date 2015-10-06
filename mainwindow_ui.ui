@@ -79,9 +79,6 @@
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_2">
     <layout class="QGridLayout" name="gridLayout">
-     <item row="0" column="0">
-      <widget class="QLineEdit" name="addrLineEdit"/>
-     </item>
      <item row="0" column="1">
       <widget class="QPushButton" name="connectButton">
        <property name="text">
@@ -93,6 +90,22 @@
       <widget class="QPushButton" name="disconnectButton">
        <property name="text">
         <string>Disconnect</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QComboBox" name="addrComboBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="editable">
+        <bool>true</bool>
+       </property>
+       <property name="insertPolicy">
+        <enum>QComboBox::InsertAtTop</enum>
        </property>
       </widget>
      </item>
