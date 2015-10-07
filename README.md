@@ -1,4 +1,4 @@
-simple OPC-UA GUI client.
+Simple OPC-UA GUI client.
 
 Written using freeopcua python api and pyside. Pull requests / Patches are welcome!
 
@@ -7,17 +7,14 @@ Written using freeopcua python api and pyside. Pull requests / Patches are welco
 What works:
 * Connecting and disconnecting
 * showing attributes and references
-* catch and display some errors
+* subscribing to variable
 
 TODO (listed after priority):
-* catch and display all errors in UI
+* remember connections and show connection history
+* detect lost connection and automatically reconnect 
 * more human friendly attributes and refs display
-* subscribing to variable
 * subscribing to events
-* remember connections and show history
 * make available on pip
-* login with user (need UI change)
-* improve UI
 * installer for windows
 
 NOT PLANNED:
