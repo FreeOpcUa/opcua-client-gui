@@ -8,13 +8,13 @@ What works:
 * Connecting and disconnecting
 * showing attributes and references
 * subscribing to variable
+* make available on pip: sudo pip install freeopcua-client
 
 TODO (listed after priority):
 * remember connections and show connection history
 * detect lost connection and automatically reconnect 
 * more human friendly attributes and refs display
 * subscribing to events
-* make available on pip
 * installer for windows
 
 NOT PLANNED:
