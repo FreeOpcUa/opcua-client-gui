@@ -5,8 +5,6 @@ from opcua import Node
 from opcua import AttributeIds
 from opcua import ObjectIds
 
-from IPython import embed
-
 
 class UaClient(object):
     """

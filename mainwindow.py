@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 
 import sys 
-sys.path.insert(0, "..") #FIXME remove
 
 from PySide import QtCore
 from PySide import QtGui 
@@ -10,7 +9,6 @@ from PySide import QtGui
 from uaclient import UaClient
 from mainwindow_ui import Ui_MainWindow
 
-from IPython import embed
 
 
 class SubHandler(object):
@@ -56,6 +54,7 @@ class Window(QtGui.QMainWindow):
         self.ui.statusBar.hide()
         self.ui.addrComboBox.insertItem(-1, "opc.tcp://localhost:4841/")
         self.ui.addrComboBox.insertItem(1, "opc.tcp://localhost:53530/OPCUA/SimulationServer/")
+        self.ui.addrComboBox.insertItem(1, "opc.tcp://10.0.5.15:49320/")
 
         self.attr_model = QtGui.QStandardItemModel()
         self.refs_model = QtGui.QStandardItemModel()
@@ -252,11 +251,13 @@ class MyModel(QtGui.QStandardItemModel):
             raise
 
 
-
-if __name__ == "__main__":
+def main():
     app = QtGui.QApplication(sys.argv)
     client = Window()
     client.show()
     sys.exit(app.exec_())
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+if __name__ == "__main__":
+    main()
 
