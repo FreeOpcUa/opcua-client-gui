@@ -77,10 +77,16 @@ class Window(QtGui.QMainWindow):
         self.ui.treeView.clicked.connect(self._show_attrs_and_refs)
         self.ui.treeView.expanded.connect(self._fit)
 
-        self.ui.actionSubscribe.triggered.connect(self._subscribe)
+        self.ui.actionSubscribeDataChange.triggered.connect(self._subscribe)
+        self.ui.actionSubscribeEvent.triggered.connect(self._subscribeEvent)
         self.ui.actionConnect.triggered.connect(self._connect)
         self.ui.actionDisconnect.triggered.connect(self._disconnect)
-        
+
+        # context menu
+        self.ui.treeView.addAction(self.ui.actionSubscribeDataChange)
+        self.ui.treeView.addAction(self.ui.actionSubscribeEvent)
+        self.ui.treeView.addAction(self.ui.actionUnsubscribe)
+
         # handle subscriptions
         self._subhandler = SubHandler(self.sub_model)
 
@@ -95,11 +101,14 @@ class Window(QtGui.QMainWindow):
     def _fit(self, idx):
         self.ui.treeView.resizeColumnToContents(0)
 
+    def _subscribeEvent(self):
+        self.showError("Not Implemented")
+
     def _subscribe(self):
         idx = self.ui.treeView.currentIndex()
         it = self.model.itemFromIndex(idx)
         if not id:
-            print("No item currently selected")
+            self.show_error("No item currently selected")
         node = it.data()
         attrs = self.uaclient.get_node_attrs(node)
         self.sub_model.setHorizontalHeaderLabels(["DisplayName", "Browse Name", 'NodeId', "Value"])
@@ -109,6 +118,7 @@ class Window(QtGui.QMainWindow):
                     QtGui.QStandardItem(attrs[3])
                     ])
         try:
+            # FIXME use handle to unsubscribe!!!
             handle = self.uaclient.subscribe(node, self._subhandler)
         except Exception as ex:
             self.show_error(ex)

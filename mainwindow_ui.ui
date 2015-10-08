@@ -21,11 +21,17 @@
        <enum>Qt::Horizontal</enum>
       </property>
       <widget class="QTreeView" name="treeView">
+       <property name="contextMenuPolicy">
+        <enum>Qt::ActionsContextMenu</enum>
+       </property>
        <property name="editTriggers">
         <set>QAbstractItemView::NoEditTriggers</set>
        </property>
        <property name="dragEnabled">
         <bool>true</bool>
+       </property>
+       <property name="dragDropMode">
+        <enum>QAbstractItemView::DragOnly</enum>
        </property>
       </widget>
       <widget class="QSplitter" name="splitter_2">
@@ -52,7 +58,8 @@
     </property>
     <addaction name="actionConnect"/>
     <addaction name="actionDisconnect"/>
-    <addaction name="actionSubscribe"/>
+    <addaction name="actionSubscribeDataChange"/>
+    <addaction name="actionSubscribeEvent"/>
     <addaction name="actionUnsubscribe"/>
    </widget>
    <addaction name="menuOPC_UA_Client"/>
@@ -122,7 +129,17 @@
    <widget class="QWidget" name="dockWidgetContents_3">
     <layout class="QGridLayout" name="gridLayout_3">
      <item row="0" column="0">
-      <widget class="QTableView" name="subView"/>
+      <widget class="QTableView" name="subView">
+       <property name="acceptDrops">
+        <bool>true</bool>
+       </property>
+       <property name="dragDropOverwriteMode">
+        <bool>false</bool>
+       </property>
+       <property name="dragDropMode">
+        <enum>QAbstractItemView::DropOnly</enum>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>
@@ -161,15 +178,15 @@
     <string>Disconnect</string>
    </property>
    <property name="toolTip">
-    <string>disconnect from server</string>
+    <string>Disconnect from server</string>
    </property>
   </action>
-  <action name="actionSubscribe">
+  <action name="actionSubscribeDataChange">
    <property name="text">
-    <string>subscribe</string>
+    <string>Subscribe to data change</string>
    </property>
    <property name="toolTip">
-    <string>Subscribe to selected node</string>
+    <string>Subscribe to data change from selected node</string>
    </property>
   </action>
   <action name="actionUnsubscribe">
@@ -178,6 +195,14 @@
    </property>
    <property name="toolTip">
     <string>Unsubscribe to current node</string>
+   </property>
+  </action>
+  <action name="actionSubscribeEvent">
+   <property name="text">
+    <string>Subscribe to events</string>
+   </property>
+   <property name="toolTip">
+    <string>Subscribe to events from selected node</string>
    </property>
   </action>
  </widget>
