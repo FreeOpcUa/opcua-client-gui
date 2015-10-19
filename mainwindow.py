@@ -2,8 +2,9 @@
 
 import sys 
 
-from PySide import QtCore
-from PySide import QtGui 
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtGui import QStandardItemModel, QStandardItem
+from PyQt5.QtWidgets import QMainWindow, QWidget, QApplication, QAbstractItemView
 
 
 from uaclient import UaClient
@@ -35,20 +36,19 @@ class SubHandler(object):
 
 
 
-class Window(QtGui.QMainWindow):
+class Window(QMainWindow):
     def __init__(self):
-        QtGui.QMainWindow.__init__(self)
+        QMainWindow.__init__(self)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
         #fix stuff imposible to do in qtdesigner
         #remove dock titlebar for addressbar
-        w = QtGui.QWidget()
+        w = QWidget()
         self.ui.addrDockWidget.setTitleBarWidget(w)
         #tabify some docks
         self.tabifyDockWidget(self.ui.evDockWidget, self.ui.subDockWidget)
         self.tabifyDockWidget(self.ui.subDockWidget, self.ui.refDockWidget)
-
 
         # init widgets
         self.ui.statusBar.hide()
@@ -56,9 +56,9 @@ class Window(QtGui.QMainWindow):
         self.ui.addrComboBox.insertItem(1, "opc.tcp://localhost:53530/OPCUA/SimulationServer/")
         self.ui.addrComboBox.insertItem(1, "opc.tcp://10.0.5.15:49320/")
 
-        self.attr_model = QtGui.QStandardItemModel()
-        self.refs_model = QtGui.QStandardItemModel()
-        self.sub_model = QtGui.QStandardItemModel()
+        self.attr_model = QStandardItemModel()
+        self.refs_model = QStandardItemModel()
+        self.sub_model = QStandardItemModel()
         self.ui.attrView.setModel(self.attr_model)
         self.ui.refView.setModel(self.refs_model)
         self.ui.subView.setModel(self.sub_model)
@@ -68,7 +68,7 @@ class Window(QtGui.QMainWindow):
         self.model.error.connect(self.show_error)
         self.ui.treeView.setModel(self.model)
         self.ui.treeView.setUniformRowHeights(True)
-        self.ui.treeView.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        self.ui.treeView.setSelectionBehavior(QAbstractItemView.SelectRows)
 
         self.uaclient = UaClient() 
         self.ui.connectButton.clicked.connect(self._connect)
@@ -112,10 +112,10 @@ class Window(QtGui.QMainWindow):
         node = it.data()
         attrs = self.uaclient.get_node_attrs(node)
         self.sub_model.setHorizontalHeaderLabels(["DisplayName", "Browse Name", 'NodeId', "Value"])
-        item = QtGui.QStandardItem(attrs[1])
+        item = QStandardItem(attrs[1])
         self.sub_model.appendRow([item,
-                    QtGui.QStandardItem(attrs[2]),
-                    QtGui.QStandardItem(attrs[3])
+                    QStandardItem(attrs[2]),
+                    QStandardItem(attrs[3])
                     ])
         try:
             # FIXME use handle to unsubscribe!!!
@@ -153,10 +153,10 @@ class Window(QtGui.QMainWindow):
             self.show_error(ex)
             raise
         for ref in refs:
-            self.refs_model.appendRow([QtGui.QStandardItem(str(ref.ReferenceTypeId)),
-                    QtGui.QStandardItem(str(ref.NodeId)),
-                    QtGui.QStandardItem(str(ref.BrowseName)),
-                    QtGui.QStandardItem(str(ref.TypeDefinition))])
+            self.refs_model.appendRow([QStandardItem(str(ref.ReferenceTypeId)),
+                    QStandardItem(str(ref.NodeId)),
+                    QStandardItem(str(ref.BrowseName)),
+                    QStandardItem(str(ref.TypeDefinition))])
         self.ui.refView.resizeColumnToContents(0)
         self.ui.refView.resizeColumnToContents(1)
         self.ui.refView.resizeColumnToContents(2)
@@ -171,7 +171,7 @@ class Window(QtGui.QMainWindow):
         self.attr_model.clear()
         self.attr_model.setHorizontalHeaderLabels(['Attribute', 'Value'])
         for k, v in attrs.items():
-            self.attr_model.appendRow([QtGui.QStandardItem(k), QtGui.QStandardItem(str(v))])
+            self.attr_model.appendRow([QStandardItem(k), QStandardItem(str(v))])
         self.ui.attrView.resizeColumnToContents(0)
         self.ui.attrView.resizeColumnToContents(1)
 
@@ -206,9 +206,9 @@ class Window(QtGui.QMainWindow):
         event.accept()
 
 
-class MyModel(QtGui.QStandardItemModel):
+class MyModel(QStandardItemModel):
 
-    error = QtCore.Signal(str)
+    error = pyqtSignal(str)
 
     def __init__(self, parent):
         super(MyModel, self).__init__(parent)
@@ -216,12 +216,12 @@ class MyModel(QtGui.QStandardItemModel):
         self._fetched = [] 
 
     def clear(self):
-        QtGui.QStandardItemModel.clear(self)
+        QStandardItemModel.clear(self)
         self._fetched = []
         self.setHorizontalHeaderLabels(['Name', "Browse Name", 'NodeId'])
 
     def add_item(self, attrs, parent=None):
-        data = [QtGui.QStandardItem(str(attr)) for attr in attrs[1:]]
+        data = [QStandardItem(str(attr)) for attr in attrs[1:]]
         data[0].setData(attrs[0])
         if parent:
             return parent.appendRow(data)
@@ -244,7 +244,7 @@ class MyModel(QtGui.QStandardItemModel):
             return True
         node = item.data()
         if node in self._fetched:
-            return QtGui.QStandardItemModel.hasChildren(self, idx)
+            return QStandardItemModel.hasChildren(self, idx)
         return True
 
     def fetchMore(self, idx):
@@ -262,7 +262,7 @@ class MyModel(QtGui.QStandardItemModel):
 
 
 def main():
-    app = QtGui.QApplication(sys.argv)
+    app = QApplication(sys.argv)
     client = Window()
     client.show()
     sys.exit(app.exec_())
