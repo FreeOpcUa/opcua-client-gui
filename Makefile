@@ -1,6 +1,6 @@
 all:
-	pyuic5 mainwindow_ui.ui -o mainwindow_ui.py
+	pyuic5 freeopcuaclient/mainwindow_ui.ui -o freeopcuaclient/mainwindow_ui.py
 run:
-	python3 mainwindow.py
+	python3 freeopcuaclient/mainwindow.py
 edit:
-	qtcreator mainwindow_ui.ui
+	qtcreator freeopcuaclient/mainwindow_ui.ui

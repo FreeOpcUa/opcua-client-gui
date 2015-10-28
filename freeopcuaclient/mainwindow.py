@@ -7,8 +7,8 @@ from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from PyQt5.QtWidgets import QMainWindow, QWidget, QApplication, QAbstractItemView
 
 
-from uaclient import UaClient
-from mainwindow_ui import Ui_MainWindow
+from freeopcuaclient.uaclient import UaClient
+from freeopcuaclient.mainwindow_ui import Ui_MainWindow
 
 
 
