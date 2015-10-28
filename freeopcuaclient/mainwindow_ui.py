@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'mainwindow_ui.ui'
+# Form implementation generated from reading ui file 'freeopcuaclient/mainwindow_ui.ui'
 #
 # Created by: PyQt5 UI code generator 5.4.2
 #
@@ -50,14 +50,19 @@ class Ui_MainWindow(object):
         self.attrDockWidget.setObjectName("attrDockWidget")
         self.dockWidgetContents = QtWidgets.QWidget()
         self.dockWidgetContents.setObjectName("dockWidgetContents")
-        self.verticalLayout = QtWidgets.QVBoxLayout(self.dockWidgetContents)
-        self.verticalLayout.setContentsMargins(11, 11, 11, 11)
-        self.verticalLayout.setSpacing(6)
-        self.verticalLayout.setObjectName("verticalLayout")
+        self.gridLayout_4 = QtWidgets.QGridLayout(self.dockWidgetContents)
+        self.gridLayout_4.setContentsMargins(11, 11, 11, 11)
+        self.gridLayout_4.setSpacing(6)
+        self.gridLayout_4.setObjectName("gridLayout_4")
         self.attrView = QtWidgets.QTreeView(self.dockWidgetContents)
         self.attrView.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
         self.attrView.setObjectName("attrView")
-        self.verticalLayout.addWidget(self.attrView)
+        self.gridLayout_4.addWidget(self.attrView, 0, 0, 1, 2)
+        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.gridLayout_4.addItem(spacerItem, 1, 0, 1, 1)
+        self.attrRefreshButton = QtWidgets.QPushButton(self.dockWidgetContents)
+        self.attrRefreshButton.setObjectName("attrRefreshButton")
+        self.gridLayout_4.addWidget(self.attrRefreshButton, 1, 1, 1, 1)
         self.attrDockWidget.setWidget(self.dockWidgetContents)
         MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(2), self.attrDockWidget)
         self.addrDockWidget = QtWidgets.QDockWidget(MainWindow)
@@ -162,6 +167,7 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "FreeOpcUa Client"))
         self.menuOPC_UA_Client.setTitle(_translate("MainWindow", "Actions"))
         self.attrDockWidget.setWindowTitle(_translate("MainWindow", "Attributes"))
+        self.attrRefreshButton.setText(_translate("MainWindow", "Refresh"))
         self.connectButton.setText(_translate("MainWindow", "Connect"))
         self.disconnectButton.setText(_translate("MainWindow", "Disconnect"))
         self.subDockWidget.setWindowTitle(_translate("MainWindow", "Subscriptions"))

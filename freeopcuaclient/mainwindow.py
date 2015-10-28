@@ -82,6 +82,8 @@ class Window(QMainWindow):
         self.ui.actionConnect.triggered.connect(self._connect)
         self.ui.actionDisconnect.triggered.connect(self._disconnect)
 
+        self.ui.attrRefreshButton.clicked.connect(self.show_attrs)
+
         # context menu
         self.ui.treeView.addAction(self.ui.actionSubscribeDataChange)
         self.ui.treeView.addAction(self.ui.actionSubscribeEvent)
@@ -126,7 +128,7 @@ class Window(QMainWindow):
             self.sub_model.takeRow(idx.row())
 
     def unsubscribe(self):
-        idx = self.model.currentIndex()
+        idx = self.ui.treeView.currentIndex()
         it = self.model.itemFromIndex(idx)
         if not id:
             print("No item currently selected")
@@ -134,15 +136,29 @@ class Window(QMainWindow):
         self.uaclient.unsubscribe(node)
 
     def _show_attrs_and_refs(self, idx):
+        node = self.get_current_node(idx)
+        if node:
+            self._show_attrs(node)
+            self._show_refs(node)
+
+    def get_current_node(self, idx=None):
+        if idx is None:
+            idx = self.ui.treeView.currentIndex()
         it = self.model.itemFromIndex(idx)
         if not it:
-            return
+            return None
         node = it.data()
         if not node:
             print("No node for item:", it, it.text()) 
-            return
-        self._show_attrs(node)
-        self._show_refs(node)
+            return None
+        return node
+
+    def show_attrs(self):
+        node = self.get_current_node()
+        if node:
+            self._show_attrs(node)
+        else:
+            self.attr_model.clear()
 
     def _show_refs(self, node):
         self.refs_model.clear()
