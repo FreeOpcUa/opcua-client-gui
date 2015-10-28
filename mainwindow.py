@@ -2,7 +2,7 @@
 
 import sys 
 
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSignal, QTimer
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from PyQt5.QtWidgets import QMainWindow, QWidget, QApplication, QAbstractItemView
 
@@ -96,7 +96,7 @@ class Window(QMainWindow):
         self.ui.statusBar.setStyleSheet("QStatusBar { background-color : red; color : black; }")
         #self.ui.statusBar.clear()
         self.ui.statusBar.showMessage(str(msg))
-        QtCore.QTimer.singleShot(1500, self.ui.statusBar.hide)
+        QTimer.singleShot(1500, self.ui.statusBar.hide)
         
     def _fit(self, idx):
         self.ui.treeView.resizeColumnToContents(0)
