@@ -1,6 +1,6 @@
 Simple OPC-UA GUI client.
 
-Written using freeopcua python api and pyside. Pull requests / Patches are welcome!
+Written using freeopcua python api and pyside. This is alpha quality with strange window resizing happening. Pull requests / Patches are welcome!
 
 ![Screenshot](/screenshot.png?raw=true "Screenshot")
 
