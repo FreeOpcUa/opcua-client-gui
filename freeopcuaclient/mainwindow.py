@@ -2,7 +2,7 @@
 
 import sys 
 
-from PyQt5.QtCore import pyqtSignal, QTimer
+from PyQt5.QtCore import pyqtSignal, QTimer, Qt, QObject
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from PyQt5.QtWidgets import QMainWindow, QWidget, QApplication, QAbstractItemView
 
@@ -12,23 +12,16 @@ from freeopcuaclient.mainwindow_ui import Ui_MainWindow
 
 
 
-class SubHandler(object):
-
+class SubHandler(QObject):
     """
     Subscription Handler. To receive events from server for a subscription
     """
-    def __init__(self, model):
-        self._model = model
+
+    data_change_fired = pyqtSignal(str, str)
 
     def data_change(self, handle, node, val, attr):
         print("Python: New data change event", handle, node, val, attr)
-        items = self._model.findItems(node.nodeid.to_string(), column=2)
-        print("ITEMS are ", items)
-        for item in items:
-            idx = self._model.indexFromItem(item)
-            i = idx.sibling(idx.row(), 3)
-            it = self._model.itemFromIndex(i)
-            it.setText(str(val))
+        self.data_change_fired.emit(node.nodeid.to_string(), str(val))
 
     def event(self, handle, event):
         print("Python: New event", handle, event)
@@ -90,7 +83,8 @@ class Window(QMainWindow):
         self.ui.treeView.addAction(self.ui.actionUnsubscribe)
 
         # handle subscriptions
-        self._subhandler = SubHandler(self.sub_model)
+        self._subhandler = SubHandler()
+        self._subhandler.data_change_fired.connect(self._update_subscription_model, type = Qt.QueuedConnection)
 
     def show_error(self, msg, level=1):
         print("showing error: ", msg, level)
@@ -134,6 +128,14 @@ class Window(QMainWindow):
             print("No item currently selected")
         node = it.data()
         self.uaclient.unsubscribe(node)
+
+    def _update_subscription_model(self, nodeid, value):
+        items = self.sub_model.findItems(nodeid, column=2)
+        for item in items:
+            idx = self.sub_model.indexFromItem(item)
+            i = idx.sibling(idx.row(), 3)
+            it = self.sub_model.itemFromIndex(i)
+            it.setText(value)
 
     def _show_attrs_and_refs(self, idx):
         node = self.get_current_node(idx)
