@@ -9,15 +9,14 @@ What works:
 * showing attributes and references
 * subscribing to variable
 * make available on pip: sudo pip install freeopcua-client
+* remember connections and show connection history
 
 TODO (listed after priority):
-* remember connections and show connection history
+
 * detect lost connection and automatically reconnect 
 * more human friendly attributes and refs display
 * subscribing to events
 * installer for windows
-
-NOT PLANNED:
 * support for certificates (need to be implemented in python-opcua)
 * support for encryption (need to be implemented in python-opcua)
 
