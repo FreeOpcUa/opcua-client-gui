@@ -4,7 +4,7 @@ import sys
 
 from PyQt5.QtCore import pyqtSignal, QTimer, Qt, QObject, QSettings
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
-from PyQt5.QtWidgets import QMainWindow, QWidget, QApplication, QAbstractItemView
+from PyQt5.QtWidgets import QMainWindow, QWidget, QApplication, QAbstractItemView, QHeaderView
 
 
 from freeopcuaclient.uaclient import UaClient
@@ -59,8 +59,11 @@ class Window(QMainWindow):
         self.refs_model = QStandardItemModel()
         self.sub_model = QStandardItemModel()
         self.ui.attrView.setModel(self.attr_model)
+        self.ui.attrView.header().setSectionResizeMode(1)
         self.ui.refView.setModel(self.refs_model)
+        self.ui.refView.horizontalHeader().setSectionResizeMode(1)
         self.ui.subView.setModel(self.sub_model)
+        self.ui.subView.horizontalHeader().setSectionResizeMode(1)
 
         self.model = MyModel(self)
         self.model.clear()
@@ -68,13 +71,15 @@ class Window(QMainWindow):
         self.ui.treeView.setModel(self.model)
         self.ui.treeView.setUniformRowHeights(True)
         self.ui.treeView.setSelectionBehavior(QAbstractItemView.SelectRows)
+        #self.ui.treeView.header().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.ui.treeView.header().setSectionResizeMode(1)
 
         self.uaclient = UaClient() 
         self.ui.connectButton.clicked.connect(self._connect)
         self.ui.disconnectButton.clicked.connect(self._disconnect)
         self.ui.treeView.activated.connect(self._show_attrs_and_refs)
         self.ui.treeView.clicked.connect(self._show_attrs_and_refs)
-        self.ui.treeView.expanded.connect(self._fit)
+        #self.ui.treeView.expanded.connect(self._fit)
 
         self.ui.actionSubscribeDataChange.triggered.connect(self._subscribe)
         self.ui.actionSubscribeEvent.triggered.connect(self._subscribeEvent)
@@ -99,9 +104,6 @@ class Window(QMainWindow):
         #self.ui.statusBar.clear()
         self.ui.statusBar.showMessage(str(msg))
         QTimer.singleShot(1500, self.ui.statusBar.hide)
-        
-    def _fit(self, idx):
-        self.ui.treeView.resizeColumnToContents(0)
 
     def _subscribeEvent(self):
         self.showError("Not Implemented")
@@ -181,10 +183,6 @@ class Window(QMainWindow):
                     QStandardItem(str(ref.NodeId)),
                     QStandardItem(str(ref.BrowseName)),
                     QStandardItem(str(ref.TypeDefinition))])
-        self.ui.refView.resizeColumnToContents(0)
-        self.ui.refView.resizeColumnToContents(1)
-        self.ui.refView.resizeColumnToContents(2)
-        self.ui.refView.resizeColumnToContents(3)
 
     def _show_attrs(self, node):
         try:
@@ -196,8 +194,6 @@ class Window(QMainWindow):
         self.attr_model.setHorizontalHeaderLabels(['Attribute', 'Value'])
         for k, v in attrs.items():
             self.attr_model.appendRow([QStandardItem(k), QStandardItem(str(v))])
-        self.ui.attrView.resizeColumnToContents(0)
-        self.ui.attrView.resizeColumnToContents(1)
 
     def _connect(self):
         uri = self.ui.addrComboBox.currentText()
@@ -216,9 +212,6 @@ class Window(QMainWindow):
         self.model.client = self.uaclient
         self.model.clear()
         self.model.add_item(self.uaclient.get_root_attrs())
-        self.ui.treeView.resizeColumnToContents(0)
-        self.ui.treeView.resizeColumnToContents(1)
-        self.ui.treeView.resizeColumnToContents(2)
 
     def _disconnect(self):
         try:
