@@ -2,7 +2,7 @@
 
 import sys 
 
-from PyQt5.QtCore import pyqtSignal, QTimer, Qt, QObject
+from PyQt5.QtCore import pyqtSignal, QTimer, Qt, QObject, QSettings
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from PyQt5.QtWidgets import QMainWindow, QWidget, QApplication, QAbstractItemView
 
@@ -43,11 +43,17 @@ class Window(QMainWindow):
         self.tabifyDockWidget(self.ui.evDockWidget, self.ui.subDockWidget)
         self.tabifyDockWidget(self.ui.subDockWidget, self.ui.refDockWidget)
 
+        # we only show statusbar in case of errors
+        self.ui.statusBar.hide()  
+
+        # load settings, seconds arg is default
+        self.settings = QSettings("FreeOpcUa", "FreeOpcUaClient")
+        self._address_list = self.settings.value("address_list", ["opc.tcp://localhost:4841", "opc.tcp://localhost:53530/OPCUA/SimulationServer/"])
+        self._address_list_max_count = int(self.settings.value("address_list_max_count", 10)) 
+
         # init widgets
-        self.ui.statusBar.hide()
-        self.ui.addrComboBox.insertItem(-1, "opc.tcp://localhost:4841/")
-        self.ui.addrComboBox.insertItem(1, "opc.tcp://localhost:53530/OPCUA/SimulationServer/")
-        self.ui.addrComboBox.insertItem(1, "opc.tcp://10.0.5.15:49320/")
+        for addr in self._address_list:
+            self.ui.addrComboBox.insertItem(-1, addr)
 
         self.attr_model = QStandardItemModel()
         self.refs_model = QStandardItemModel()
@@ -84,7 +90,7 @@ class Window(QMainWindow):
 
         # handle subscriptions
         self._subhandler = SubHandler()
-        self._subhandler.data_change_fired.connect(self._update_subscription_model, type = Qt.QueuedConnection)
+        self._subhandler.data_change_fired.connect(self._update_subscription_model, type=Qt.QueuedConnection)
 
     def show_error(self, msg, level=1):
         print("showing error: ", msg, level)
@@ -201,6 +207,12 @@ class Window(QMainWindow):
             self.show_error(ex)
             raise
 
+        if not uri in self._address_list:
+            # we are connected to new address, save it
+            self._address_list.insert(0, uri)
+            if len(self._address_list) > self._address_list_max_count:
+                self._address_list.pop(-1)
+
         self.model.client = self.uaclient
         self.model.clear()
         self.model.add_item(self.uaclient.get_root_attrs())
@@ -220,6 +232,7 @@ class Window(QMainWindow):
             self.model.client = None
 
     def closeEvent(self, event):
+        self.settings.setValue("address_list", self._address_list)  
         self._disconnect()
         event.accept()
 
