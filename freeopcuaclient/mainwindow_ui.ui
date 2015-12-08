@@ -34,11 +34,6 @@
         <enum>QAbstractItemView::DragOnly</enum>
        </property>
       </widget>
-      <widget class="QSplitter" name="splitter_2">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-      </widget>
      </widget>
     </item>
    </layout>
