@@ -53,6 +53,7 @@ class Window(QMainWindow):
         self._address_list = self.settings.value("address_list", ["opc.tcp://localhost:4841", "opc.tcp://localhost:53530/OPCUA/SimulationServer/"])
         self._address_list_max_count = int(self.settings.value("address_list_max_count", 10)) 
 
+
         # init widgets
         for addr in self._address_list:
             self.ui.addrComboBox.insertItem(-1, addr)
@@ -76,7 +77,10 @@ class Window(QMainWindow):
         #self.ui.treeView.header().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.ui.treeView.header().setSectionResizeMode(1)
 
-        self._subscribed_nodes = []
+        self.resize(int(self.settings.value("main_window_width", 800)), int(self.settings.value("main_window_height", 600)))
+        self.restoreState(self.settings.value("main_window_state", b""))
+
+        self._subscribed_nodes = [] # FIXME: not really needed
 
         self.uaclient = UaClient() 
         self.ui.connectButton.clicked.connect(self._connect)
@@ -244,6 +248,9 @@ class Window(QMainWindow):
             self.model.client = None
 
     def closeEvent(self, event):
+        self.settings.setValue("main_window_width", self.size().width())
+        self.settings.setValue("main_window_height", self.size().height())
+        self.settings.setValue("main_window_state", self.saveState())  
         self.settings.setValue("address_list", self._address_list)  
         self._disconnect()
         event.accept()
