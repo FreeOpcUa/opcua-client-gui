@@ -3,12 +3,13 @@
 import sys 
 
 from PyQt5.QtCore import pyqtSignal, QTimer, Qt, QObject, QSettings
-from PyQt5.QtGui import QStandardItemModel, QStandardItem
+from PyQt5.QtGui import QStandardItemModel, QStandardItem, QIcon
 from PyQt5.QtWidgets import QMainWindow, QWidget, QApplication, QAbstractItemView, QHeaderView
 
 
 from freeopcuaclient.uaclient import UaClient
 from freeopcuaclient.mainwindow_ui import Ui_MainWindow
+from opcua import ua
 
 
 
@@ -20,7 +21,6 @@ class SubHandler(QObject):
     data_change_fired = pyqtSignal(str, str)
 
     def data_change(self, handle, node, val, attr):
-        print("Python: New data change event", handle, node, val, attr)
         self.data_change_fired.emit(node.nodeid.to_string(), str(val))
 
     def event(self, handle, event):
@@ -83,6 +83,7 @@ class Window(QMainWindow):
 
         self.ui.actionSubscribeDataChange.triggered.connect(self._subscribe)
         self.ui.actionSubscribeEvent.triggered.connect(self._subscribeEvent)
+        self.ui.actionUnsubscribe.triggered.connect(self._unsubscribe)
         self.ui.actionConnect.triggered.connect(self._connect)
         self.ui.actionDisconnect.triggered.connect(self._disconnect)
 
@@ -118,23 +119,23 @@ class Window(QMainWindow):
         self.sub_model.setHorizontalHeaderLabels(["DisplayName", "Browse Name", 'NodeId', "Value"])
         item = QStandardItem(attrs[1])
         self.sub_model.appendRow([item,
-                    QStandardItem(attrs[2]),
-                    QStandardItem(attrs[3])
-                    ])
+                                 QStandardItem(attrs[2]),
+                                 QStandardItem(attrs[3])
+                                 ])
         try:
-            # FIXME use handle to unsubscribe!!!
-            handle = self.uaclient.subscribe(node, self._subhandler)
+            self.uaclient.subscribe(node, self._subhandler)
         except Exception as ex:
             self.show_error(ex)
             idx = self.sub_model.indexFromItem(item)
             self.sub_model.takeRow(idx.row())
 
-    def unsubscribe(self):
+    def _unsubscribe(self):
         idx = self.ui.treeView.currentIndex()
         it = self.model.itemFromIndex(idx)
         if not id:
             print("No item currently selected")
         node = it.data()
+        #FIXME: remove node from view
         self.uaclient.unsubscribe(node)
 
     def _update_subscription_model(self, nodeid, value):
@@ -203,15 +204,19 @@ class Window(QMainWindow):
             self.show_error(ex)
             raise
 
-        if not uri in self._address_list:
-            # we are connected to new address, save it
-            self._address_list.insert(0, uri)
-            if len(self._address_list) > self._address_list_max_count:
-                self._address_list.pop(-1)
-
+        self._update_address_list(uri)
         self.model.client = self.uaclient
         self.model.clear()
-        self.model.add_item(self.uaclient.get_root_attrs())
+        self.model.add_item(self.uaclient.get_root_node())
+
+    def _update_address_list(self, uri):
+        if uri == self._address_list[0]:
+            return
+        if uri in self._address_list:
+            self._address_list.remove(uri)
+        self._address_list.insert(0, uri)
+        if len(self._address_list) > self._address_list_max_count:
+            self._address_list.pop(-1)
 
     def _disconnect(self):
         try:
@@ -244,9 +249,27 @@ class MyModel(QStandardItemModel):
         self._fetched = []
         self.setHorizontalHeaderLabels(['Name', "Browse Name", 'NodeId'])
 
-    def add_item(self, attrs, parent=None):
-        data = [QStandardItem(str(attr)) for attr in attrs[1:]]
-        data[0].setData(attrs[0])
+    def add_item(self, node, desc=None, parent=None):
+        if desc is None:
+            #attrs = node.get_attributes([ua.AttributeIds.DisplayName, ua.AttributeIds.BrowseName, ua.AttributeIds.NodeId])
+            #data = [QStandardItem(str(attr)) for attr in attrs]
+            data = [QStandardItem("Root")]
+            data[0].setIcon(QIcon("folder.svg"))
+        else:
+            data = [QStandardItem(desc.DisplayName.to_string()), QStandardItem(desc.BrowseName.to_string()), QStandardItem(desc.NodeId.to_string())]
+            if desc.NodeClass == ua.NodeClass.Object:
+                if desc.TypeDefinition == ua.TwoByteNodeId(ua.ObjectIds.FolderType):
+                    data[0].setIcon(QIcon("folder.svg"))
+                else:
+                    data[0].setIcon(QIcon("object.svg"))
+                print(desc.DisplayName, "object with def", desc.TypeDefinition)
+            elif desc.NodeClass == ua.NodeClass.Variable:
+                if desc.TypeDefinition == ua.TwoByteNodeId(ua.ObjectIds.PropertyType):
+                    data[0].setIcon(QIcon("property.svg"))
+                else:
+                    data[0].setIcon(QIcon("variable.svg"))
+
+        data[0].setData(node)
         if parent:
             return parent.appendRow(data)
         else:
@@ -278,8 +301,8 @@ class MyModel(QStandardItemModel):
 
     def _fetchMore(self, parent):
         try:
-            for attrs in self.client.get_children(parent.data()):
-                self.add_item(attrs, parent)
+            for node, attrs in self.client.get_children(parent.data()):
+                self.add_item(node, attrs, parent)
         except Exception as ex:
             self.error.emit(ex)
             raise

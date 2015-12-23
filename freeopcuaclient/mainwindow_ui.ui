@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>FreeOpcUa Client</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../network.svg</normaloff>../network.svg</iconset>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_2">
     <item row="0" column="0">
@@ -106,6 +110,18 @@
    </widget>
   </widget>
   <widget class="QDockWidget" name="addrDockWidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="features">
+    <set>QDockWidget::NoDockWidgetFeatures</set>
+   </property>
+   <property name="allowedAreas">
+    <set>Qt::TopDockWidgetArea</set>
+   </property>
    <attribute name="dockWidgetArea">
     <number>4</number>
    </attribute>

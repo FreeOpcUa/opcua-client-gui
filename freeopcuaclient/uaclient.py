@@ -15,6 +15,7 @@ class UaClient(object):
         self.client = None
         self._connected = False
         self._subscription = None
+        self._subs = {}
 
     def connect(self, uri):
         self.disconnect()
@@ -28,6 +29,7 @@ class UaClient(object):
     def disconnect(self):
         if self._connected:
             print("Disconnecting from server")
+            self._subs = {}
             self._connected = False
             self._subscription = None
             self.client.disconnect()
@@ -36,22 +38,30 @@ class UaClient(object):
     def subscribe(self, node, handler):
         if not self._subscription:
             self._subscription = self.client.create_subscription(500, handler)
-        self._subscription.subscribe_data_change(node)
+        handle = self._subscription.subscribe_data_change(node)
+        self._subs[node.nodeid] = handle
+        return handle
+
+    def unsubscribe(self, node):
+        self._subscription.unsubscribe(self._subs[node.nodeid])
 
     def get_root_attrs(self):
         return self.get_node_attrs(self.client.get_root_node())
 
+    def get_root_node(self):
+        return self.client.get_root_node()
+
     def get_node_attrs(self, node):
-        if not type(node) is Node:
+        if not isinstance(node, Node):
             node = self.client.get_node(node)
         attrs = node.get_attributes([AttributeIds.DisplayName, AttributeIds.BrowseName, AttributeIds.NodeId])
-        return [node] + [attr.Value.Value.to_string() for attr in attrs] 
+        return node, [attr.Value.Value.to_string() for attr in attrs] 
 
     def get_children(self, node):
         descs = node.get_children_descriptions()
         children = []
         for desc in descs:
-            children.append([self.client.get_node(desc.NodeId), desc.DisplayName.to_string(), desc.BrowseName.to_string(), desc.NodeId.to_string()])
+            children.append([self.client.get_node(desc.NodeId), desc])
         return children
 
     def get_all_attrs(self, node):
