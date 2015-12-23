@@ -9,9 +9,9 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="108.48146mm"
-   height="124.6741mm"
-   viewBox="0 0 384.38313 441.75863"
+   width="33.932812mm"
+   height="37.033398mm"
+   viewBox="0 0 120.23437 131.2207"
    id="svg2"
    version="1.1"
    inkscape:version="0.91 r13725"
@@ -25,9 +25,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.4"
-     inkscape:cx="197.9739"
-     inkscape:cy="290.4396"
+     inkscape:zoom="2.8"
+     inkscape:cx="59.748666"
+     inkscape:cy="57.759199"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -44,8 +44,8 @@
        type="xygrid"
        id="grid4136"
        units="mm"
-       originx="-99.252448"
-       originy="-148.74819" />
+       originx="-241.40624"
+       originy="-410.00001" />
   </sodipodi:namedview>
   <metadata
      id="metadata7">
@@ -63,12 +63,17 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-99.252445,-461.85538)">
-    <path
-       style="fill:#00eded;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 100,462.3622 180,440 L 482.85714,463.79077 414.28571,463.07649 282.85714,735.93363 178.57143,463.07649 Z"
-       id="path4138"
-       inkscape:connector-curvature="0"
-       sodipodi:nodetypes="ccccccc" />
+     transform="translate(-241.40625,-511.14148)">
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:180px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#00a900;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;"
+       x="240"
+       y="642.36218"
+       id="text4135"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4137"
+         x="240"
+         y="642.36218">V</tspan></text>
   </g>
 </svg>

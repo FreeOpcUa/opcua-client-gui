@@ -23,8 +23,6 @@ class UaClient(object):
         self.client = Client(uri)
         self.client.connect()
         self._connected = True
-        print("Connected, root is: ", self.client.get_root_node())
-        print(self.get_root_attrs())
 
     def disconnect(self):
         if self._connected:
@@ -45,11 +43,16 @@ class UaClient(object):
     def unsubscribe(self, node):
         self._subscription.unsubscribe(self._subs[node.nodeid])
 
-    def get_root_attrs(self):
-        return self.get_node_attrs(self.client.get_root_node())
-
-    def get_root_node(self):
-        return self.client.get_root_node()
+    def get_root_node_and_desc(self):
+        node = self.client.get_root_node()
+        attrs = node.get_attributes([AttributeIds.DisplayName, AttributeIds.BrowseName, AttributeIds.NodeId, AttributeIds.NodeClass])
+        desc = ua.ReferenceDescription()
+        desc.DisplayName = attrs[0].Value.Value
+        desc.BrowseName = attrs[1].Value.Value
+        desc.NodeId = attrs[2].Value.Value
+        desc.NodeClass = attrs[3].Value.Value
+        desc.TypeDefinition = ua.TwoByteNodeId(ua.ObjectIds.FolderType)
+        return node, desc
 
     def get_node_attrs(self, node):
         if not isinstance(node, Node):
@@ -61,7 +64,7 @@ class UaClient(object):
         descs = node.get_children_descriptions()
         children = []
         for desc in descs:
-            children.append([self.client.get_node(desc.NodeId), desc])
+            children.append((self.client.get_node(desc.NodeId), desc))
         return children
 
     def get_all_attrs(self, node):

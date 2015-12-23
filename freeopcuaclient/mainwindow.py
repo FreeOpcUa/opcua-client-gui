@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import QMainWindow, QWidget, QApplication, QAbstractItemVie
 
 from freeopcuaclient.uaclient import UaClient
 from freeopcuaclient.mainwindow_ui import Ui_MainWindow
+from freeopcuaclient import resources
 from opcua import ua
 
 
@@ -18,10 +19,10 @@ class SubHandler(QObject):
     Subscription Handler. To receive events from server for a subscription
     """
 
-    data_change_fired = pyqtSignal(str, str)
+    data_change_fired = pyqtSignal(object, str)
 
     def data_change(self, handle, node, val, attr):
-        self.data_change_fired.emit(node.nodeid.to_string(), str(val))
+        self.data_change_fired.emit(node, str(val))
 
     def event(self, handle, event):
         print("Python: New event", handle, event)
@@ -34,6 +35,7 @@ class Window(QMainWindow):
         QMainWindow.__init__(self)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        self.setWindowIcon(QIcon(":/network.svg"))
 
         #fix stuff imposible to do in qtdesigner
         #remove dock titlebar for addressbar
@@ -74,6 +76,8 @@ class Window(QMainWindow):
         #self.ui.treeView.header().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.ui.treeView.header().setSectionResizeMode(1)
 
+        self._subscribed_nodes = []
+
         self.uaclient = UaClient() 
         self.ui.connectButton.clicked.connect(self._connect)
         self.ui.disconnectButton.clicked.connect(self._disconnect)
@@ -107,7 +111,7 @@ class Window(QMainWindow):
         QTimer.singleShot(1500, self.ui.statusBar.hide)
 
     def _subscribeEvent(self):
-        self.showError("Not Implemented")
+        self.show_error("Not Implemented")
 
     def _subscribe(self):
         idx = self.ui.treeView.currentIndex()
@@ -115,13 +119,15 @@ class Window(QMainWindow):
         if not id:
             self.show_error("No item currently selected")
         node = it.data()
-        attrs = self.uaclient.get_node_attrs(node)
-        self.sub_model.setHorizontalHeaderLabels(["DisplayName", "Browse Name", 'NodeId', "Value"])
-        item = QStandardItem(attrs[1])
-        self.sub_model.appendRow([item,
-                                 QStandardItem(attrs[2]),
-                                 QStandardItem(attrs[3])
-                                 ])
+        if node in self._subscribed_nodes:
+            print("allready subscribed to node: ", node)
+            return
+        self.sub_model.setHorizontalHeaderLabels(["DisplayName", "Value"])
+        item = QStandardItem(it.text())
+        item.setData(node)
+        self.sub_model.appendRow([item, QStandardItem("No Data yet")])
+        self._subscribed_nodes.append(node)
+        self.ui.subDockWidget.raise_()
         try:
             self.uaclient.subscribe(node, self._subhandler)
         except Exception as ex:
@@ -137,14 +143,22 @@ class Window(QMainWindow):
         node = it.data()
         #FIXME: remove node from view
         self.uaclient.unsubscribe(node)
+        self._subscribed_nodes.remove(node)
+        i = 0
+        while self.sub_model.item(i):
+            item = self.sub_model.item(i)
+            if item.data() == node:
+                self.sub_model.removeRow(i)
+            i += 1
 
-    def _update_subscription_model(self, nodeid, value):
-        items = self.sub_model.findItems(nodeid, column=2)
-        for item in items:
-            idx = self.sub_model.indexFromItem(item)
-            i = idx.sibling(idx.row(), 3)
-            it = self.sub_model.itemFromIndex(i)
-            it.setText(value)
+    def _update_subscription_model(self, node, value):
+        i = 0
+        while self.sub_model.item(i):
+            item = self.sub_model.item(i)
+            if item.data() == node:
+                it = self.sub_model.item(i, 1)
+                it.setText(value)
+            i += 1
 
     def _show_attrs_and_refs(self, idx):
         node = self.get_current_node(idx)
@@ -207,7 +221,7 @@ class Window(QMainWindow):
         self._update_address_list(uri)
         self.model.client = self.uaclient
         self.model.clear()
-        self.model.add_item(self.uaclient.get_root_node())
+        self.model.add_item(*self.uaclient.get_root_node_and_desc())
 
     def _update_address_list(self, uri):
         if uri == self._address_list[0]:
@@ -249,25 +263,18 @@ class MyModel(QStandardItemModel):
         self._fetched = []
         self.setHorizontalHeaderLabels(['Name', "Browse Name", 'NodeId'])
 
-    def add_item(self, node, desc=None, parent=None):
-        if desc is None:
-            #attrs = node.get_attributes([ua.AttributeIds.DisplayName, ua.AttributeIds.BrowseName, ua.AttributeIds.NodeId])
-            #data = [QStandardItem(str(attr)) for attr in attrs]
-            data = [QStandardItem("Root")]
-            data[0].setIcon(QIcon("folder.svg"))
-        else:
-            data = [QStandardItem(desc.DisplayName.to_string()), QStandardItem(desc.BrowseName.to_string()), QStandardItem(desc.NodeId.to_string())]
-            if desc.NodeClass == ua.NodeClass.Object:
-                if desc.TypeDefinition == ua.TwoByteNodeId(ua.ObjectIds.FolderType):
-                    data[0].setIcon(QIcon("folder.svg"))
-                else:
-                    data[0].setIcon(QIcon("object.svg"))
-                print(desc.DisplayName, "object with def", desc.TypeDefinition)
-            elif desc.NodeClass == ua.NodeClass.Variable:
-                if desc.TypeDefinition == ua.TwoByteNodeId(ua.ObjectIds.PropertyType):
-                    data[0].setIcon(QIcon("property.svg"))
-                else:
-                    data[0].setIcon(QIcon("variable.svg"))
+    def add_item(self, node, desc, parent=None):
+        data = [QStandardItem(desc.DisplayName.to_string()), QStandardItem(desc.BrowseName.to_string()), QStandardItem(desc.NodeId.to_string())]
+        if desc.NodeClass == ua.NodeClass.Object:
+            if desc.TypeDefinition == ua.TwoByteNodeId(ua.ObjectIds.FolderType):
+                data[0].setIcon(QIcon(":/folder.svg"))
+            else:
+                data[0].setIcon(QIcon(":/object.svg"))
+        elif desc.NodeClass == ua.NodeClass.Variable:
+            if desc.TypeDefinition == ua.TwoByteNodeId(ua.ObjectIds.PropertyType):
+                data[0].setIcon(QIcon(":/property.svg"))
+            else:
+                data[0].setIcon(QIcon(":/variable.svg"))
 
         data[0].setData(node)
         if parent:

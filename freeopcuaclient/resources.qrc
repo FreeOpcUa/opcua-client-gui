@@ -1,0 +1,9 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>network.svg</file>
+    <file>folder.svg</file>
+    <file>object.svg</file>
+    <file>property.svg</file>
+    <file>variable.svg</file>
+</qresource>
+</RCC>
