@@ -1,11 +1,13 @@
 Simple OPC-UA GUI client.
 
-Written using freeopcua python api and pyqt. This is alpha quality with strange window resizing happening. Pull requests / Patches are welcome!
+Written using freeopcua python api and pyqt. Basic functionnalities are implemented including subscribing to nodes and listing attributes and references.
+
 
 ![Screenshot](/screenshot.png?raw=true "Screenshot")
 
 What works:
-* Connecting and disconnecting
+* connecting and disconnecting
+* browsing with icons per node types
 * showing attributes and references
 * subscribing to variable
 * make available on pip: sudo pip install freeopcua-client
@@ -16,8 +18,7 @@ TODO (listed after priority):
 * detect lost connection and automatically reconnect 
 * more human friendly attributes and refs display
 * subscribing to events
-* installer for windows
-* support for certificates (need to be implemented in python-opcua)
-* support for encryption (need to be implemented in python-opcua)
+* gui for certificates
+* gui for encryption 
 
 

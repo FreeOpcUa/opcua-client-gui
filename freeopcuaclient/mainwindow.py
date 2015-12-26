@@ -19,13 +19,13 @@ class SubHandler(QObject):
     Subscription Handler. To receive events from server for a subscription
     """
 
-    data_change_fired = pyqtSignal(object, str)
+    data_change_fired = pyqtSignal(object, str, str)
 
-    def data_change(self, handle, node, val, attr):
-        self.data_change_fired.emit(node, str(val))
+    def datachange_notification(self, node, val, data):
+        self.data_change_fired.emit(node, str(val), data.monitored_item.Value.SourceTimestamp.isoformat())
 
     def event(self, handle, event):
-        print("Python: New event", handle, event)
+        print("Event handling not implemented yet", handle, event)
 
 
 
@@ -126,17 +126,17 @@ class Window(QMainWindow):
         if node in self._subscribed_nodes:
             print("allready subscribed to node: ", node)
             return
-        self.sub_model.setHorizontalHeaderLabels(["DisplayName", "Value"])
-        item = QStandardItem(it.text())
-        item.setData(node)
-        self.sub_model.appendRow([item, QStandardItem("No Data yet")])
+        self.sub_model.setHorizontalHeaderLabels(["DisplayName", "Value", "SourceTimestamp"])
+        row = [QStandardItem(it.text()), QStandardItem("No Data yet"), QStandardItem("")]
+        row[0].setData(node)
+        self.sub_model.appendRow(row)
         self._subscribed_nodes.append(node)
         self.ui.subDockWidget.raise_()
         try:
             self.uaclient.subscribe(node, self._subhandler)
         except Exception as ex:
             self.show_error(ex)
-            idx = self.sub_model.indexFromItem(item)
+            idx = self.sub_model.indexFromItem(row[0])
             self.sub_model.takeRow(idx.row())
 
     def _unsubscribe(self):
@@ -155,13 +155,15 @@ class Window(QMainWindow):
                 self.sub_model.removeRow(i)
             i += 1
 
-    def _update_subscription_model(self, node, value):
+    def _update_subscription_model(self, node, value, timestamp):
         i = 0
         while self.sub_model.item(i):
             item = self.sub_model.item(i)
             if item.data() == node:
                 it = self.sub_model.item(i, 1)
                 it.setText(value)
+                it_ts = self.sub_model.item(i, 2)
+                it_ts.setText(timestamp)
             i += 1
 
     def _show_attrs_and_refs(self, idx):
@@ -268,7 +270,7 @@ class MyModel(QStandardItemModel):
     def clear(self):
         QStandardItemModel.clear(self)
         self._fetched = []
-        self.setHorizontalHeaderLabels(['Name', "Browse Name", 'NodeId'])
+        self.setHorizontalHeaderLabels(['DisplayName', "BrowseName", 'NodeId'])
 
     def add_item(self, node, desc, parent=None):
         data = [QStandardItem(desc.DisplayName.to_string()), QStandardItem(desc.BrowseName.to_string()), QStandardItem(desc.NodeId.to_string())]
