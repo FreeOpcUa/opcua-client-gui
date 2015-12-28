@@ -23,7 +23,7 @@ class DataChangeHandler(QObject):
 class EventHandler(QObject):
     event_fired = pyqtSignal(object)
 
-    def event_notification(self, handle, event):
+    def event_notification(self, event):
         self.event_fired.emit(event)
 
 
@@ -32,24 +32,45 @@ class EventUI(object):
     def __init__(self, window, uaclient):
         self.window = window
         self.uaclient = uaclient
-        self._subhandler = EventHandler()
+        self._handler = EventHandler()
         self._subscribed_nodes = []  # FIXME: not really needed
         self.model = QStandardItemModel()
         self.window.ui.evView.setModel(self.model)
-        self.window.ui.actionSubscribeEvent.triggered.connect(self._subscribeEvent)
+        self.window.ui.actionSubscribeEvent.triggered.connect(self._subscribe)
+        self.window.ui.actionUnsubscribeEvents.triggered.connect(self._unsubscribe)
         # context menu
         self.window.ui.treeView.addAction(self.window.ui.actionSubscribeEvent)
-        self._subhandler.event_fired.connect(self._update_event_model, type=Qt.QueuedConnection)
+        self.window.ui.treeView.addAction(self.window.ui.actionUnsubscribeEvents)
+        self._handler.event_fired.connect(self._update_event_model, type=Qt.QueuedConnection)
 
     def clear(self):
         self._subscribed_nodes = []
         self.model.clear()
 
-    def _subscribeEvent(self):
-        self.window.show_error("Not Implemented")
+    def _subscribe(self):
+        node = self.window.get_current_node()
+        if node is None:
+            return
+        if node in self._subscribed_nodes:
+            print("allready subscribed to event for node: ", node)
+            return
+        self.window.ui.evDockWidget.raise_()
+        try:
+            self.uaclient.subscribe_events(node, self._handler)
+        except Exception as ex:
+            self.window.show_error(ex)
+        else:
+            self._subscribed_nodes.append(node)
+
+    def _unsubscribe(self):
+        node = self.window.get_current_node()
+        if node is None:
+            return
+        self._subscribed_nodes.remove(node)
+        self.uaclient.unsubscribe_events(node)
 
     def _update_event_model(self, event):
-        print("should update GUI", event)
+        self.model.appendRow([QStandardItem(str(event))])
 
 
 class DataChangeUI(object):
@@ -64,11 +85,11 @@ class DataChangeUI(object):
         self.window.ui.subView.horizontalHeader().setSectionResizeMode(1)
 
         self.window.ui.actionSubscribeDataChange.triggered.connect(self._subscribe)
-        self.window.ui.actionUnsubscribe.triggered.connect(self._unsubscribe)
+        self.window.ui.actionUnsubscribeDataChange.triggered.connect(self._unsubscribe)
 
         # populate contextual menu
         self.window.ui.treeView.addAction(self.window.ui.actionSubscribeDataChange)
-        self.window.ui.treeView.addAction(self.window.ui.actionUnsubscribe)
+        self.window.ui.treeView.addAction(self.window.ui.actionUnsubscribeDataChange)
 
         # handle subscriptions
         self._subhandler.data_change_fired.connect(self._update_subscription_model, type=Qt.QueuedConnection)
@@ -91,7 +112,7 @@ class DataChangeUI(object):
         self._subscribed_nodes.append(node)
         self.window.ui.subDockWidget.raise_()
         try:
-            self.uaclient.subscribe(node, self._subhandler)
+            self.uaclient.subscribe_datachange(node, self._subhandler)
         except Exception as ex:
             self.window.show_error(ex)
             idx = self.model.indexFromItem(row[0])
@@ -101,7 +122,7 @@ class DataChangeUI(object):
         node = self.window.get_current_node()
         if node is None:
             return
-        self.uaclient.unsubscribe(node)
+        self.uaclient.unsubscribe_datachange(node)
         self._subscribed_nodes.remove(node)
         i = 0
         while self.model.item(i):

@@ -70,8 +70,9 @@
     <addaction name="actionConnect"/>
     <addaction name="actionDisconnect"/>
     <addaction name="actionSubscribeDataChange"/>
+    <addaction name="actionUnsubscribeDataChange"/>
     <addaction name="actionSubscribeEvent"/>
-    <addaction name="actionUnsubscribe"/>
+    <addaction name="actionUnsubscribeEvents"/>
    </widget>
    <addaction name="menuOPC_UA_Client"/>
   </widget>
@@ -305,12 +306,12 @@
     <string>Subscribe to data change from selected node</string>
    </property>
   </action>
-  <action name="actionUnsubscribe">
+  <action name="actionUnsubscribeDataChange">
    <property name="text">
-    <string>unsubscribe</string>
+    <string>Unsubscribe to DataChange</string>
    </property>
    <property name="toolTip">
-    <string>Unsubscribe to current node</string>
+    <string>Unsubscribe to DataChange for current node</string>
    </property>
   </action>
   <action name="actionSubscribeEvent">
@@ -319,6 +320,14 @@
    </property>
    <property name="toolTip">
     <string>Subscribe to events from selected node</string>
+   </property>
+  </action>
+  <action name="actionUnsubscribeEvents">
+   <property name="text">
+    <string>Unsubscribe to Events</string>
+   </property>
+   <property name="toolTip">
+    <string>Unsubscribe to Events from current node</string>
    </property>
   </action>
  </widget>
