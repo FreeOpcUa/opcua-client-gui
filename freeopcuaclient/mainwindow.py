@@ -4,31 +4,221 @@ import sys
 
 from PyQt5.QtCore import pyqtSignal, QTimer, Qt, QObject, QSettings
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QIcon
-from PyQt5.QtWidgets import QMainWindow, QWidget, QApplication, QAbstractItemView, QHeaderView
+from PyQt5.QtWidgets import QMainWindow, QWidget, QApplication, QAbstractItemView
 
+from opcua import ua
 
 from freeopcuaclient.uaclient import UaClient
 from freeopcuaclient.mainwindow_ui import Ui_MainWindow
 from freeopcuaclient import resources
-from opcua import ua
 
 
-
-class SubHandler(QObject):
-    """
-    Subscription Handler. To receive events from server for a subscription
-    """
-
+class DataChangeHandler(QObject):
     data_change_fired = pyqtSignal(object, str, str)
 
     def datachange_notification(self, node, val, data):
         self.data_change_fired.emit(node, str(val), data.monitored_item.Value.SourceTimestamp.isoformat())
 
-    def event(self, handle, event):
-        print("Event handling not implemented yet", handle, event)
+
+class EventHandler(QObject):
+    event_fired = pyqtSignal(object)
+
+    def event_notification(self, handle, event):
+        self.event_fired.emit(event)
 
 
+class EventUI(object):
+    def __init__(self, window, uaclient):
+        self.window = window
+        self.uaclient = uaclient
+        self._subhandler = EventHandler()
+        self._subscribed_nodes = []  # FIXME: not really needed
+        self.model = QStandardItemModel()
+        self.window.ui.evView.setModel(self.model)
+        self.window.ui.actionSubscribeEvent.triggered.connect(self._subscribeEvent)
+        # context menu
+        self.window.ui.treeView.addAction(self.window.ui.actionSubscribeEvent)
+        self._subhandler.event_fired.connect(self._update_event_model, type=Qt.QueuedConnection)
 
+    def clear(self):
+        self._subscribed_nodes = []
+        self.model.clear()
+
+    def _subscribeEvent(self):
+        self.window.show_error("Not Implemented")
+
+    def _update_event_model(self, event):
+        print("should update GUI", event)
+
+
+class DataChangeUI(object):
+    def __init__(self, window, uaclient):
+        self.window = window
+        self.uaclient = uaclient
+        self._subhandler = DataChangeHandler()
+        self._subscribed_nodes = [] 
+        self.model = QStandardItemModel()
+        self.window.ui.subView.setModel(self.model)
+        self.window.ui.subView.horizontalHeader().setSectionResizeMode(1)
+
+        self.window.ui.actionSubscribeDataChange.triggered.connect(self._subscribe)
+        self.window.ui.actionUnsubscribe.triggered.connect(self._unsubscribe)
+
+        #populate contextual menu
+        self.window.ui.treeView.addAction(self.window.ui.actionSubscribeDataChange)
+        self.window.ui.treeView.addAction(self.window.ui.actionUnsubscribe)
+
+        # handle subscriptions
+        self._subhandler.data_change_fired.connect(self._update_subscription_model, type=Qt.QueuedConnection)
+
+    def clear(self):
+        self._subscribed_nodes = [] 
+        self.model.clear()
+
+    def _subscribe(self):
+        node = self.window.get_current_node()
+        if node is None:
+            return
+        if node in self._subscribed_nodes:
+            print("allready subscribed to node: ", node)
+            return
+        self.model.setHorizontalHeaderLabels(["DisplayName", "Value", "SourceTimestamp"])
+        row = [QStandardItem(node.display_name), QStandardItem("No Data yet"), QStandardItem("")]
+        row[0].setData(node)
+        self.model.appendRow(row)
+        self._subscribed_nodes.append(node)
+        self.window.ui.subDockWidget.raise_()
+        try:
+            self.uaclient.subscribe(node, self._subhandler)
+        except Exception as ex:
+            self.window.show_error(ex)
+            idx = self.model.indexFromItem(row[0])
+            self.model.takeRow(idx.row())
+
+    def _unsubscribe(self):
+        node = self.window.get_current_node()
+        if node is None:
+            return
+        self.uaclient.unsubscribe(node)
+        self._subscribed_nodes.remove(node)
+        i = 0
+        while self.model.item(i):
+            item = self.model.item(i)
+            if item.data() == node:
+                self.model.removeRow(i)
+            i += 1
+
+    def _update_subscription_model(self, node, value, timestamp):
+        i = 0
+        while self.model.item(i):
+            item = self.model.item(i)
+            if item.data() == node:
+                it = self.model.item(i, 1)
+                it.setText(value)
+                it_ts = self.model.item(i, 2)
+                it_ts.setText(timestamp)
+            i += 1
+
+
+class AttrsUI(object):
+    def __init__(self, window, uaclient):
+        self.window = window
+        self.uaclient = uaclient
+        self.model = QStandardItemModel()
+        self.window.ui.attrView.setModel(self.model)
+        self.window.ui.attrView.header().setSectionResizeMode(1)
+
+        self.window.ui.treeView.activated.connect(self.show_attrs)
+        self.window.ui.treeView.clicked.connect(self.show_attrs)
+        self.window.ui.attrRefreshButton.clicked.connect(self.show_attrs)
+
+    def clear(self):
+        self.model.clear()
+
+    def show_attrs(self, idx):
+        node = self.window.get_current_node(idx)
+        if node:
+            self._show_attrs(node)
+        else:
+            self.model.clear()
+
+    def _show_attrs(self, node):
+        try:
+            attrs = self.uaclient.get_all_attrs(node) 
+        except Exception as ex:
+            self.window.show_error(ex)
+            raise
+        self.model.clear()
+        self.model.setHorizontalHeaderLabels(['Attribute', 'Value'])
+        for k, v in attrs.items():
+            self.model.appendRow([QStandardItem(k), QStandardItem(str(v))])
+
+
+class RefsUI(object):
+    def __init__(self, window, uaclient):
+        self.window = window
+        self.uaclient = uaclient
+        self.model = QStandardItemModel()
+        self.window.ui.refView.setModel(self.model)
+        self.window.ui.refView.horizontalHeader().setSectionResizeMode(1)
+
+        self.window.ui.treeView.activated.connect(self.show_refs)
+        self.window.ui.treeView.clicked.connect(self.show_refs)
+
+    def clear(self):
+        self.model.clear()
+
+    def show_refs(self, idx):
+        node = self.window.get_current_node(idx)
+        if not node:
+            self.model.clear()
+        else:
+            self._show_refs(node)
+
+    def _show_refs(self, node):
+        self.model.setHorizontalHeaderLabels(['ReferenceType', 'NodeId', "BrowseName", "TypeDefinition"])
+        try:
+            refs = self.uaclient.get_all_refs(node) 
+        except Exception as ex:
+            self.window.show_error(ex)
+            raise
+        for ref in refs:
+            self.model.appendRow([QStandardItem(str(ref.ReferenceTypeId)),
+                                  QStandardItem(str(ref.NodeId)),
+                                  QStandardItem(str(ref.BrowseName)),
+                                  QStandardItem(str(ref.TypeDefinition))])
+
+
+class TreeUI(object):
+    def __init__(self, window, uaclient):
+        self.window = window
+        self.uaclient = uaclient
+        self.model = TreeViewModel(self.uaclient)
+        self.model.clear()  # FIXME: do we need this?
+        self.model.error.connect(self.window.show_error)
+        self.window.ui.treeView.setModel(self.model)
+        self.window.ui.treeView.setUniformRowHeights(True)
+        self.window.ui.treeView.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.window.ui.treeView.header().setSectionResizeMode(1)
+
+    def clear(self):
+        self.model.clear()
+
+    def start(self):
+        self.model.clear()
+        self.model.add_item(*self.uaclient.get_root_node_and_desc())
+
+    def get_current_node(self, idx):
+        it = self.model.itemFromIndex(idx)
+        if not it:
+            return None
+        node = it.data()
+        if not node:
+            print("No node for item:", it, it.text()) 
+            return None
+        node.display_name = it.text()  # FIXME: hack
+        return node
+ 
 
 class Window(QMainWindow):
     def __init__(self):
@@ -53,168 +243,44 @@ class Window(QMainWindow):
         self._address_list = self.settings.value("address_list", ["opc.tcp://localhost:4841", "opc.tcp://localhost:53530/OPCUA/SimulationServer/"])
         self._address_list_max_count = int(self.settings.value("address_list_max_count", 10)) 
 
-
         # init widgets
         for addr in self._address_list:
             self.ui.addrComboBox.insertItem(-1, addr)
 
-        self.attr_model = QStandardItemModel()
-        self.refs_model = QStandardItemModel()
-        self.sub_model = QStandardItemModel()
-        self.ui.attrView.setModel(self.attr_model)
-        self.ui.attrView.header().setSectionResizeMode(1)
-        self.ui.refView.setModel(self.refs_model)
-        self.ui.refView.horizontalHeader().setSectionResizeMode(1)
-        self.ui.subView.setModel(self.sub_model)
-        self.ui.subView.horizontalHeader().setSectionResizeMode(1)
+        self.uaclient = UaClient() 
 
-        self.model = MyModel(self)
-        self.model.clear()
-        self.model.error.connect(self.show_error)
-        self.ui.treeView.setModel(self.model)
-        self.ui.treeView.setUniformRowHeights(True)
-        self.ui.treeView.setSelectionBehavior(QAbstractItemView.SelectRows)
-        #self.ui.treeView.header().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-        self.ui.treeView.header().setSectionResizeMode(1)
+        self.tree_ui = TreeUI(self, self.uaclient)
+        self.refs_ui = RefsUI(self, self.uaclient)
+        self.attrs_ui = AttrsUI(self, self.uaclient)
+        self.datachange_ui = DataChangeUI(self, self.uaclient)
+        self.event_ui = EventUI(self, self.uaclient)
+
 
         self.resize(int(self.settings.value("main_window_width", 800)), int(self.settings.value("main_window_height", 600)))
         self.restoreState(self.settings.value("main_window_state", b""))
 
-        self._subscribed_nodes = [] # FIXME: not really needed
 
-        self.uaclient = UaClient() 
         self.ui.connectButton.clicked.connect(self._connect)
         self.ui.disconnectButton.clicked.connect(self._disconnect)
-        self.ui.treeView.activated.connect(self._show_attrs_and_refs)
-        self.ui.treeView.clicked.connect(self._show_attrs_and_refs)
         #self.ui.treeView.expanded.connect(self._fit)
 
-        self.ui.actionSubscribeDataChange.triggered.connect(self._subscribe)
-        self.ui.actionSubscribeEvent.triggered.connect(self._subscribeEvent)
-        self.ui.actionUnsubscribe.triggered.connect(self._unsubscribe)
         self.ui.actionConnect.triggered.connect(self._connect)
         self.ui.actionDisconnect.triggered.connect(self._disconnect)
-
-        self.ui.attrRefreshButton.clicked.connect(self.show_attrs)
-
-        # context menu
-        self.ui.treeView.addAction(self.ui.actionSubscribeDataChange)
-        self.ui.treeView.addAction(self.ui.actionSubscribeEvent)
-        self.ui.treeView.addAction(self.ui.actionUnsubscribe)
-
-        # handle subscriptions
-        self._subhandler = SubHandler()
-        self._subhandler.data_change_fired.connect(self._update_subscription_model, type=Qt.QueuedConnection)
 
     def show_error(self, msg, level=1):
         print("showing error: ", msg, level)
         self.ui.statusBar.show()
         self.ui.statusBar.setStyleSheet("QStatusBar { background-color : red; color : black; }")
-        #self.ui.statusBar.clear()
         self.ui.statusBar.showMessage(str(msg))
         QTimer.singleShot(1500, self.ui.statusBar.hide)
-
-    def _subscribeEvent(self):
-        self.show_error("Not Implemented")
-
-    def _subscribe(self):
-        idx = self.ui.treeView.currentIndex()
-        it = self.model.itemFromIndex(idx)
-        if not id:
-            self.show_error("No item currently selected")
-        node = it.data()
-        if node in self._subscribed_nodes:
-            print("allready subscribed to node: ", node)
-            return
-        self.sub_model.setHorizontalHeaderLabels(["DisplayName", "Value", "SourceTimestamp"])
-        row = [QStandardItem(it.text()), QStandardItem("No Data yet"), QStandardItem("")]
-        row[0].setData(node)
-        self.sub_model.appendRow(row)
-        self._subscribed_nodes.append(node)
-        self.ui.subDockWidget.raise_()
-        try:
-            self.uaclient.subscribe(node, self._subhandler)
-        except Exception as ex:
-            self.show_error(ex)
-            idx = self.sub_model.indexFromItem(row[0])
-            self.sub_model.takeRow(idx.row())
-
-    def _unsubscribe(self):
-        idx = self.ui.treeView.currentIndex()
-        it = self.model.itemFromIndex(idx)
-        if not id:
-            print("No item currently selected")
-        node = it.data()
-        #FIXME: remove node from view
-        self.uaclient.unsubscribe(node)
-        self._subscribed_nodes.remove(node)
-        i = 0
-        while self.sub_model.item(i):
-            item = self.sub_model.item(i)
-            if item.data() == node:
-                self.sub_model.removeRow(i)
-            i += 1
-
-    def _update_subscription_model(self, node, value, timestamp):
-        i = 0
-        while self.sub_model.item(i):
-            item = self.sub_model.item(i)
-            if item.data() == node:
-                it = self.sub_model.item(i, 1)
-                it.setText(value)
-                it_ts = self.sub_model.item(i, 2)
-                it_ts.setText(timestamp)
-            i += 1
-
-    def _show_attrs_and_refs(self, idx):
-        node = self.get_current_node(idx)
-        if node:
-            self._show_attrs(node)
-            self._show_refs(node)
 
     def get_current_node(self, idx=None):
         if idx is None:
             idx = self.ui.treeView.currentIndex()
-        it = self.model.itemFromIndex(idx)
-        if not it:
-            return None
-        node = it.data()
-        if not node:
-            print("No node for item:", it, it.text()) 
-            return None
-        return node
-
-    def show_attrs(self):
-        node = self.get_current_node()
-        if node:
-            self._show_attrs(node)
-        else:
-            self.attr_model.clear()
-
-    def _show_refs(self, node):
-        self.refs_model.clear()
-        self.refs_model.setHorizontalHeaderLabels(['ReferenceType', 'NodeId', "BrowseName", "TypeDefinition"])
-        try:
-            refs = self.uaclient.get_all_refs(node) 
-        except Exception as ex:
-            self.show_error(ex)
-            raise
-        for ref in refs:
-            self.refs_model.appendRow([QStandardItem(str(ref.ReferenceTypeId)),
-                    QStandardItem(str(ref.NodeId)),
-                    QStandardItem(str(ref.BrowseName)),
-                    QStandardItem(str(ref.TypeDefinition))])
-
-    def _show_attrs(self, node):
-        try:
-            attrs = self.uaclient.get_all_attrs(node) 
-        except Exception as ex:
-            self.show_error(ex)
-            raise
-        self.attr_model.clear()
-        self.attr_model.setHorizontalHeaderLabels(['Attribute', 'Value'])
-        for k, v in attrs.items():
-            self.attr_model.appendRow([QStandardItem(k), QStandardItem(str(v))])
+        return self.tree_ui.get_current_node(idx)
+   
+    def get_uaclient(self):
+        return self.uaclient
 
     def _connect(self):
         uri = self.ui.addrComboBox.currentText()
@@ -225,9 +291,7 @@ class Window(QMainWindow):
             raise
 
         self._update_address_list(uri)
-        self.model.client = self.uaclient
-        self.model.clear()
-        self.model.add_item(*self.uaclient.get_root_node_and_desc())
+        self.tree_ui.start()
 
     def _update_address_list(self, uri):
         if uri == self._address_list[0]:
@@ -245,9 +309,11 @@ class Window(QMainWindow):
             self.show_error(ex)
             raise
         finally:
-            self.model.clear()
-            self.sub_model.clear()
-            self.model.client = None
+            self.tree_ui.clear()
+            self.refs_ui.clear()
+            self.attrs_ui.clear()
+            self.datachange_ui.clear()
+            self.event_ui.clear()
 
     def closeEvent(self, event):
         self.settings.setValue("main_window_width", self.size().width())
@@ -258,13 +324,13 @@ class Window(QMainWindow):
         event.accept()
 
 
-class MyModel(QStandardItemModel):
+class TreeViewModel(QStandardItemModel):
 
     error = pyqtSignal(str)
 
-    def __init__(self, parent):
-        super(MyModel, self).__init__(parent)
-        self.client = None
+    def __init__(self, uaclient):
+        super(TreeViewModel, self).__init__()
+        self.uaclient = uaclient
         self._fetched = [] 
 
     def clear(self):
@@ -317,7 +383,7 @@ class MyModel(QStandardItemModel):
 
     def _fetchMore(self, parent):
         try:
-            for node, attrs in self.client.get_children(parent.data()):
+            for node, attrs in self.uaclient.get_children(parent.data()):
                 self.add_item(node, attrs, parent)
         except Exception as ex:
             self.error.emit(ex)
