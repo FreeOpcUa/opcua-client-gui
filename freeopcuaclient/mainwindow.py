@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-import sys 
+import sys
 
 from PyQt5.QtCore import pyqtSignal, QTimer, Qt, QObject, QSettings
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QIcon
@@ -28,6 +28,7 @@ class EventHandler(QObject):
 
 
 class EventUI(object):
+
     def __init__(self, window, uaclient):
         self.window = window
         self.uaclient = uaclient
@@ -52,11 +53,12 @@ class EventUI(object):
 
 
 class DataChangeUI(object):
+
     def __init__(self, window, uaclient):
         self.window = window
         self.uaclient = uaclient
         self._subhandler = DataChangeHandler()
-        self._subscribed_nodes = [] 
+        self._subscribed_nodes = []
         self.model = QStandardItemModel()
         self.window.ui.subView.setModel(self.model)
         self.window.ui.subView.horizontalHeader().setSectionResizeMode(1)
@@ -64,7 +66,7 @@ class DataChangeUI(object):
         self.window.ui.actionSubscribeDataChange.triggered.connect(self._subscribe)
         self.window.ui.actionUnsubscribe.triggered.connect(self._unsubscribe)
 
-        #populate contextual menu
+        # populate contextual menu
         self.window.ui.treeView.addAction(self.window.ui.actionSubscribeDataChange)
         self.window.ui.treeView.addAction(self.window.ui.actionUnsubscribe)
 
@@ -72,7 +74,7 @@ class DataChangeUI(object):
         self._subhandler.data_change_fired.connect(self._update_subscription_model, type=Qt.QueuedConnection)
 
     def clear(self):
-        self._subscribed_nodes = [] 
+        self._subscribed_nodes = []
         self.model.clear()
 
     def _subscribe(self):
@@ -121,6 +123,7 @@ class DataChangeUI(object):
 
 
 class AttrsUI(object):
+
     def __init__(self, window, uaclient):
         self.window = window
         self.uaclient = uaclient
@@ -144,7 +147,7 @@ class AttrsUI(object):
 
     def _show_attrs(self, node):
         try:
-            attrs = self.uaclient.get_all_attrs(node) 
+            attrs = self.uaclient.get_all_attrs(node)
         except Exception as ex:
             self.window.show_error(ex)
             raise
@@ -155,6 +158,7 @@ class AttrsUI(object):
 
 
 class RefsUI(object):
+
     def __init__(self, window, uaclient):
         self.window = window
         self.uaclient = uaclient
@@ -178,7 +182,7 @@ class RefsUI(object):
     def _show_refs(self, node):
         self.model.setHorizontalHeaderLabels(['ReferenceType', 'NodeId', "BrowseName", "TypeDefinition"])
         try:
-            refs = self.uaclient.get_all_refs(node) 
+            refs = self.uaclient.get_all_refs(node)
         except Exception as ex:
             self.window.show_error(ex)
             raise
@@ -190,6 +194,7 @@ class RefsUI(object):
 
 
 class TreeUI(object):
+
     def __init__(self, window, uaclient):
         self.window = window
         self.uaclient = uaclient
@@ -214,40 +219,41 @@ class TreeUI(object):
             return None
         node = it.data()
         if not node:
-            print("No node for item:", it, it.text()) 
+            print("No node for item:", it, it.text())
             return None
         node.display_name = it.text()  # FIXME: hack
         return node
- 
+
 
 class Window(QMainWindow):
+
     def __init__(self):
         QMainWindow.__init__(self)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.setWindowIcon(QIcon(":/network.svg"))
 
-        #fix stuff imposible to do in qtdesigner
-        #remove dock titlebar for addressbar
+        # fix stuff imposible to do in qtdesigner
+        # remove dock titlebar for addressbar
         w = QWidget()
         self.ui.addrDockWidget.setTitleBarWidget(w)
-        #tabify some docks
+        # tabify some docks
         self.tabifyDockWidget(self.ui.evDockWidget, self.ui.subDockWidget)
         self.tabifyDockWidget(self.ui.subDockWidget, self.ui.refDockWidget)
 
         # we only show statusbar in case of errors
-        self.ui.statusBar.hide()  
+        self.ui.statusBar.hide()
 
         # load settings, seconds arg is default
         self.settings = QSettings("FreeOpcUa", "FreeOpcUaClient")
         self._address_list = self.settings.value("address_list", ["opc.tcp://localhost:4841", "opc.tcp://localhost:53530/OPCUA/SimulationServer/"])
-        self._address_list_max_count = int(self.settings.value("address_list_max_count", 10)) 
+        self._address_list_max_count = int(self.settings.value("address_list_max_count", 10))
 
         # init widgets
         for addr in self._address_list:
             self.ui.addrComboBox.insertItem(-1, addr)
 
-        self.uaclient = UaClient() 
+        self.uaclient = UaClient()
 
         self.tree_ui = TreeUI(self, self.uaclient)
         self.refs_ui = RefsUI(self, self.uaclient)
@@ -255,14 +261,12 @@ class Window(QMainWindow):
         self.datachange_ui = DataChangeUI(self, self.uaclient)
         self.event_ui = EventUI(self, self.uaclient)
 
-
         self.resize(int(self.settings.value("main_window_width", 800)), int(self.settings.value("main_window_height", 600)))
         self.restoreState(self.settings.value("main_window_state", b""))
 
-
         self.ui.connectButton.clicked.connect(self._connect)
         self.ui.disconnectButton.clicked.connect(self._disconnect)
-        #self.ui.treeView.expanded.connect(self._fit)
+        # self.ui.treeView.expanded.connect(self._fit)
 
         self.ui.actionConnect.triggered.connect(self._connect)
         self.ui.actionDisconnect.triggered.connect(self._disconnect)
@@ -278,7 +282,7 @@ class Window(QMainWindow):
         if idx is None:
             idx = self.ui.treeView.currentIndex()
         return self.tree_ui.get_current_node(idx)
-   
+
     def get_uaclient(self):
         return self.uaclient
 
@@ -318,8 +322,8 @@ class Window(QMainWindow):
     def closeEvent(self, event):
         self.settings.setValue("main_window_width", self.size().width())
         self.settings.setValue("main_window_height", self.size().height())
-        self.settings.setValue("main_window_state", self.saveState())  
-        self.settings.setValue("address_list", self._address_list)  
+        self.settings.setValue("main_window_state", self.saveState())
+        self.settings.setValue("address_list", self._address_list)
         self._disconnect()
         event.accept()
 
@@ -331,7 +335,7 @@ class TreeViewModel(QStandardItemModel):
     def __init__(self, uaclient):
         super(TreeViewModel, self).__init__()
         self.uaclient = uaclient
-        self._fetched = [] 
+        self._fetched = []
 
     def clear(self):
         QStandardItemModel.clear(self)
@@ -399,4 +403,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

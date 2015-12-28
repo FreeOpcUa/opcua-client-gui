@@ -11,6 +11,7 @@ class UaClient(object):
     OPC-Ua client specialized for the need of GUI client
     return exactly whant GUI needs, no customization possible
     """
+
     def __init__(self):
         self.client = None
         self._connected = False
@@ -58,7 +59,7 @@ class UaClient(object):
         if not isinstance(node, Node):
             node = self.client.get_node(node)
         attrs = node.get_attributes([AttributeIds.DisplayName, AttributeIds.BrowseName, AttributeIds.NodeId])
-        return node, [attr.Value.Value.to_string() for attr in attrs] 
+        return node, [attr.Value.Value.to_string() for attr in attrs]
 
     def get_children(self, node):
         descs = node.get_children_descriptions()
@@ -84,8 +85,3 @@ class UaClient(object):
 
     def get_all_refs(self, node):
         return node.get_children_descriptions(refs=ObjectIds.References)
-
-
-
-
-
