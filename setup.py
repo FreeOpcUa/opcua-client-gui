@@ -3,7 +3,7 @@ from distutils.command.install_data import install_data
 
 
 setup(name="freeopcua-client",
-      version="0.4.1",
+      version="0.4.2",
       description="Minimal OPC-UA Client GUI",
       author="Olivier R-D",
       url='https://github.com/FreeOpcUa/opcua-client-gui',
