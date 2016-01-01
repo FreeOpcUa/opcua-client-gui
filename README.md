@@ -1,5 +1,7 @@
 Simple OPC-UA GUI client.
 
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/FreeOpcUa/opcua-client-gui/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/FreeOpcUa/opcua-client-gui/?branch=master)
+
 Written using freeopcua python api and pyqt. Basic functionnalities are implemented including subscribing to nodes and listing attributes and references.
 
 
