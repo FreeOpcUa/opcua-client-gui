@@ -7,15 +7,16 @@
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="23.911718mm"
-   height="37.033398mm"
-   viewBox="0 0 84.726561 131.2207"
+   width="72.571426mm"
+   height="72.571426mm"
+   viewBox="0 0 257.14285 257.14285"
    id="svg2"
    version="1.1"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="property.svg">
+   sodipodi:docname="variable.svg">
   <defs
      id="defs4" />
   <sodipodi:namedview
@@ -25,12 +26,12 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.4"
-     inkscape:cx="101.61971"
-     inkscape:cy="-4.6384552e-06"
+     inkscape:zoom="1.979899"
+     inkscape:cx="237.4345"
+     inkscape:cy="48.165318"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
-     showgrid="false"
+     showgrid="true"
      fit-margin-top="0"
      fit-margin-left="0"
      fit-margin-right="0"
@@ -39,7 +40,11 @@
      inkscape:window-height="1056"
      inkscape:window-x="53"
      inkscape:window-y="24"
-     inkscape:window-maximized="1" />
+     inkscape:window-maximized="1">
+    <inkscape:grid
+       type="xygrid"
+       id="grid4177" />
+  </sodipodi:namedview>
   <metadata
      id="metadata7">
     <rdf:RDF>
@@ -56,17 +61,38 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-231.95172,-372.57007)">
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:180px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="214.28571"
-       y="503.79077"
-       id="text4136"
-       sodipodi:linespacing="125%"><tspan
-         sodipodi:role="line"
-         id="tspan4138"
-         x="214.28571"
-         y="503.79077">P</tspan></text>
+     transform="translate(-180,-363.79077)">
+    <rect
+       style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#00e4ff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:3.75;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+       id="rect4136"
+       width="257.14285"
+       height="257.14285"
+       x="180"
+       y="363.79077"
+       ry="54.285713" />
+    <rect
+       style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#ffffff;stroke-width:4.12274265;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+       id="rect4138"
+       width="207.71869"
+       height="37.002899"
+       x="204.23718"
+       y="408.07123"
+       ry="13.796658" />
+    <use
+       x="0"
+       y="0"
+       xlink:href="#rect4138"
+       id="use4173"
+       transform="translate(-2.0203051,129.29952)"
+       width="100%"
+       height="100%" />
+    <use
+       x="0"
+       y="0"
+       xlink:href="#use4173"
+       id="use4175"
+       transform="translate(1.5152284,-64.649767)"
+       width="100%"
+       height="100%" />
   </g>
 </svg>

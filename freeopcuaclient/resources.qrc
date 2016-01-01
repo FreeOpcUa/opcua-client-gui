@@ -5,5 +5,6 @@
     <file>object.svg</file>
     <file>property.svg</file>
     <file>variable.svg</file>
+    <file>method.svg</file>
 </qresource>
 </RCC>

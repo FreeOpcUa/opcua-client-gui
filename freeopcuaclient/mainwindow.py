@@ -375,6 +375,8 @@ class TreeViewModel(QStandardItemModel):
                 data[0].setIcon(QIcon(":/property.svg"))
             else:
                 data[0].setIcon(QIcon(":/variable.svg"))
+        elif desc.NodeClass == ua.NodeClass.Method:
+                data[0].setIcon(QIcon(":/method.svg"))
 
         data[0].setData(node)
         if parent:
