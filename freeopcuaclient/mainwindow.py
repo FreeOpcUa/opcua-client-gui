@@ -175,7 +175,7 @@ class AttrsUI(object):
         self.model.clear()
         self.model.setHorizontalHeaderLabels(['Attribute', 'Value'])
         for k, v in attrs.items():
-            self.model.appendRow([QStandardItem(k), QStandardItem(str(v))])
+            self.model.appendRow([QStandardItem(k), QStandardItem(repr(v))])
 
 
 class RefsUI(object):
