@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
 import sys
+import datetime
 
 from PyQt5.QtCore import pyqtSignal, QTimer, Qt, QObject, QSettings
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QIcon
@@ -17,7 +18,13 @@ class DataChangeHandler(QObject):
     data_change_fired = pyqtSignal(object, str, str)
 
     def datachange_notification(self, node, val, data):
-        self.data_change_fired.emit(node, str(val), data.monitored_item.Value.SourceTimestamp.isoformat())
+        if data.monitored_item.Value.SourceTimestamp:
+            dato = data.monitored_item.Value.SourceTimestamp.isoformat()
+        elif data.monitored_item.Value.ServerTimestamp:
+            dato = data.monitored_item.Value.ServerTimestamp.isoformat()
+        else:
+            dato = datetime.datetime.now().isoformat()
+        self.data_change_fired.emit(node, str(val), dato)
 
 
 class EventHandler(QObject):
@@ -105,7 +112,7 @@ class DataChangeUI(object):
         if node in self._subscribed_nodes:
             print("allready subscribed to node: ", node)
             return
-        self.model.setHorizontalHeaderLabels(["DisplayName", "Value", "SourceTimestamp"])
+        self.model.setHorizontalHeaderLabels(["DisplayName", "Value", "Timestamp"])
         row = [QStandardItem(node.display_name), QStandardItem("No Data yet"), QStandardItem("")]
         row[0].setData(node)
         self.model.appendRow(row)
