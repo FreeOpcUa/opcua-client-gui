@@ -2,6 +2,7 @@
 
 import sys
 import datetime
+from enum import Enum
 
 from PyQt5.QtCore import pyqtSignal, QTimer, Qt, QObject, QSettings, QModelIndex
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QIcon
@@ -206,7 +207,17 @@ class AttrsUI(object):
         self.model.clear()
         self.model.setHorizontalHeaderLabels(['Attribute', 'Value'])
         for k, v in attrs.items():
-            self.model.appendRow([QStandardItem(k), QStandardItem(repr(v))])
+            if isinstance(v, (ua.NodeId, ua.QualifiedName, ua.LocalizedText)):
+                v = v.to_string()
+            elif isinstance(v, Enum):
+                v = repr(v)
+            elif isinstance(v, ua.DataValue):
+                print("VALUE:", k, v)
+                v = repr(v)
+            else:
+                v = str(v)
+            print(type(k), type(v))
+            self.model.appendRow([QStandardItem(k), QStandardItem(v)])
 
 
 class RefsUI(object):
