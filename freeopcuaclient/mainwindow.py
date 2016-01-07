@@ -3,9 +3,9 @@
 import sys
 import datetime
 
-from PyQt5.QtCore import pyqtSignal, QTimer, Qt, QObject, QSettings
+from PyQt5.QtCore import pyqtSignal, QTimer, Qt, QObject, QSettings, QModelIndex
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QIcon
-from PyQt5.QtWidgets import QMainWindow, QWidget, QApplication, QAbstractItemView
+from PyQt5.QtWidgets import QMainWindow, QWidget, QApplication, QAbstractItemView, QMenu, QAction
 
 from opcua import ua
 
@@ -163,10 +163,34 @@ class AttrsUI(object):
         self.window.ui.treeView.clicked.connect(self.show_attrs)
         self.window.ui.attrRefreshButton.clicked.connect(self.show_attrs)
 
+        # Context menu
+        self.window.ui.attrView.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.window.ui.attrView.customContextMenuRequested.connect(self.showContextMenu)
+        copyaction = QAction("&Copy Value", self.model)
+        copyaction.triggered.connect(self._copy_value)
+        self._contextMenu = QMenu()
+        self._contextMenu.addAction(copyaction)
+
+    def showContextMenu(self, position):
+        item = self.get_current_item()
+        if item:
+            self._contextMenu.exec_(self.window.ui.attrView.mapToGlobal(position))
+
+    def get_current_item(self, col_idx=0):
+        idx = self.window.ui.attrView.currentIndex()
+        return self.model.item(idx.row(), col_idx)
+
+    def _copy_value(self, position):
+        it = self.get_current_item(1)
+        if it:
+            QApplication.clipboard().setText(it.text())
+
     def clear(self):
         self.model.clear()
 
     def show_attrs(self, idx):
+        if not isinstance(idx, QModelIndex):
+            idx = None
         node = self.window.get_current_node(idx)
         if node:
             self._show_attrs(node)
