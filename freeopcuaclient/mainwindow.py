@@ -193,10 +193,9 @@ class AttrsUI(object):
         if not isinstance(idx, QModelIndex):
             idx = None
         node = self.window.get_current_node(idx)
+        self.model.clear()
         if node:
             self._show_attrs(node)
-        else:
-            self.model.clear()
 
     def _show_attrs(self, node):
         try:
@@ -204,7 +203,6 @@ class AttrsUI(object):
         except Exception as ex:
             self.window.show_error(ex)
             raise
-        self.model.clear()
         self.model.setHorizontalHeaderLabels(['Attribute', 'Value'])
         for k, v in attrs.items():
             if isinstance(v, (ua.NodeId)):
@@ -237,9 +235,8 @@ class RefsUI(object):
 
     def show_refs(self, idx):
         node = self.window.get_current_node(idx)
-        if not node:
-            self.model.clear()
-        else:
+        self.model.clear()
+        if node:
             self._show_refs(node)
 
     def _show_refs(self, node):
