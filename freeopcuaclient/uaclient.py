@@ -2,8 +2,6 @@
 from opcua import ua
 from opcua import Client
 from opcua import Node
-from opcua import AttributeIds
-from opcua import ObjectIds
 
 
 class UaClient(object):
@@ -60,7 +58,7 @@ class UaClient(object):
 
     def get_root_node_and_desc(self):
         node = self.client.get_root_node()
-        attrs = node.get_attributes([AttributeIds.DisplayName, AttributeIds.BrowseName, AttributeIds.NodeId, AttributeIds.NodeClass])
+        attrs = node.get_attributes([ua.AttributeIds.DisplayName, ua.AttributeIds.BrowseName, ua.AttributeIds.NodeId, ua.AttributeIds.NodeClass])
         desc = ua.ReferenceDescription()
         desc.DisplayName = attrs[0].Value.Value
         desc.BrowseName = attrs[1].Value.Value
@@ -72,7 +70,7 @@ class UaClient(object):
     def get_node_attrs(self, node):
         if not isinstance(node, Node):
             node = self.client.get_node(node)
-        attrs = node.get_attributes([AttributeIds.DisplayName, AttributeIds.BrowseName, AttributeIds.NodeId])
+        attrs = node.get_attributes([ua.AttributeIds.DisplayName, ua.AttributeIds.BrowseName, ua.AttributeIds.NodeId])
         return node, [attr.Value.Value.to_string() for attr in attrs]
 
     def get_children(self, node):
@@ -98,4 +96,4 @@ class UaClient(object):
         return res
 
     def get_all_refs(self, node):
-        return node.get_children_descriptions(refs=ObjectIds.References)
+        return node.get_children_descriptions(refs=ua.ObjectIds.References)
