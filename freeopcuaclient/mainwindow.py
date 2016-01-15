@@ -207,16 +207,16 @@ class AttrsUI(object):
         self.model.clear()
         self.model.setHorizontalHeaderLabels(['Attribute', 'Value'])
         for k, v in attrs.items():
-            if isinstance(v, (ua.NodeId, ua.QualifiedName, ua.LocalizedText)):
+            if isinstance(v, (ua.NodeId)):
+                v = str(v)
+            elif isinstance(v, (ua.QualifiedName, ua.LocalizedText)):
                 v = v.to_string()
             elif isinstance(v, Enum):
                 v = repr(v)
             elif isinstance(v, ua.DataValue):
-                print("VALUE:", k, v)
                 v = repr(v)
             else:
                 v = str(v)
-            print(type(k), type(v))
             self.model.appendRow([QStandardItem(k), QStandardItem(v)])
 
 
@@ -277,6 +277,7 @@ class TreeUI(object):
         self.model.add_item(*self.uaclient.get_root_node_and_desc())
 
     def get_current_node(self, idx):
+        idx = idx.sibling(idx.row(), 0)
         it = self.model.itemFromIndex(idx)
         if not it:
             return None
@@ -309,7 +310,7 @@ class Window(QMainWindow):
 
         # load settings, seconds arg is default
         self.settings = QSettings("FreeOpcUa", "FreeOpcUaClient")
-        self._address_list = self.settings.value("address_list", ["opc.tcp://localhost:4841", "opc.tcp://localhost:53530/OPCUA/SimulationServer/"])
+        self._address_list = self.settings.value("address_list", ["opc.tcp://localhost:4840", "opc.tcp://localhost:53530/OPCUA/SimulationServer/"])
         self._address_list_max_count = int(self.settings.value("address_list_max_count", 10))
 
         # init widgets
