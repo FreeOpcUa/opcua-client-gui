@@ -14,12 +14,14 @@ What works:
 * subscribing to variable
 * make available on pip: sudo pip install freeopcua-client
 * remember connections and show connection history
+* subscribing to events
 
 TODO (listed after priority):
 
+* display datatype and timestamp in attribute view for variables
+* write node values
 * detect lost connection and automatically reconnect 
-* more human friendly attributes and refs display
-* subscribing to events
+* more human friendly refs display
 * gui for certificates
 * gui for encryption 
 
