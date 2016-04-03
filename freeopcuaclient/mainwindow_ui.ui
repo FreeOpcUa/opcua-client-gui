@@ -65,10 +65,12 @@
    </property>
    <widget class="QMenu" name="menuOPC_UA_Client">
     <property name="title">
-     <string>Actions</string>
+     <string>Act&amp;ions</string>
     </property>
     <addaction name="actionConnect"/>
     <addaction name="actionDisconnect"/>
+    <addaction name="actionCopyPath"/>
+    <addaction name="actionCopyNodeId"/>
     <addaction name="actionSubscribeDataChange"/>
     <addaction name="actionUnsubscribeDataChange"/>
     <addaction name="actionSubscribeEvent"/>
@@ -91,7 +93,7 @@
     </size>
    </property>
    <property name="windowTitle">
-    <string>Attributes</string>
+    <string>&amp;Attributes</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>2</number>
@@ -205,7 +207,7 @@
     </sizepolicy>
    </property>
    <property name="windowTitle">
-    <string>Subscriptions</string>
+    <string>S&amp;ubscriptions</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>2</number>
@@ -245,7 +247,7 @@
     </sizepolicy>
    </property>
    <property name="windowTitle">
-    <string>References</string>
+    <string>&amp;References</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>2</number>
@@ -272,7 +274,7 @@
     </sizepolicy>
    </property>
    <property name="windowTitle">
-    <string>Events</string>
+    <string>&amp;Events</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>2</number>
@@ -287,12 +289,12 @@
   </widget>
   <action name="actionConnect">
    <property name="text">
-    <string>Connect</string>
+    <string>&amp;Connect</string>
    </property>
   </action>
   <action name="actionDisconnect">
    <property name="text">
-    <string>Disconnect</string>
+    <string>&amp;Disconnect</string>
    </property>
    <property name="toolTip">
     <string>Disconnect from server</string>
@@ -300,7 +302,7 @@
   </action>
   <action name="actionSubscribeDataChange">
    <property name="text">
-    <string>Subscribe to data change</string>
+    <string>&amp;Subscribe to data change</string>
    </property>
    <property name="toolTip">
     <string>Subscribe to data change from selected node</string>
@@ -308,7 +310,7 @@
   </action>
   <action name="actionUnsubscribeDataChange">
    <property name="text">
-    <string>Unsubscribe to DataChange</string>
+    <string>&amp;Unsubscribe to DataChange</string>
    </property>
    <property name="toolTip">
     <string>Unsubscribe to DataChange for current node</string>
@@ -316,7 +318,7 @@
   </action>
   <action name="actionSubscribeEvent">
    <property name="text">
-    <string>Subscribe to events</string>
+    <string>Subscribe to &amp;events</string>
    </property>
    <property name="toolTip">
     <string>Subscribe to events from selected node</string>
@@ -324,10 +326,26 @@
   </action>
   <action name="actionUnsubscribeEvents">
    <property name="text">
-    <string>Unsubscribe to Events</string>
+    <string>U&amp;nsubscribe to Events</string>
    </property>
    <property name="toolTip">
     <string>Unsubscribe to Events from current node</string>
+   </property>
+  </action>
+  <action name="actionCopyPath">
+   <property name="text">
+    <string>Copy &amp;Path</string>
+   </property>
+   <property name="toolTip">
+    <string>Copy path to node to clipboard</string>
+   </property>
+  </action>
+  <action name="actionCopyNodeId">
+   <property name="text">
+    <string>C&amp;opy NodeId</string>
+   </property>
+   <property name="toolTip">
+    <string>Copy NodeId to clipboard</string>
    </property>
   </action>
  </widget>

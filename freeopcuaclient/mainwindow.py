@@ -265,6 +265,11 @@ class TreeUI(object):
         self.window.ui.treeView.setUniformRowHeights(True)
         self.window.ui.treeView.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.window.ui.treeView.header().setSectionResizeMode(1)
+        self.window.ui.actionCopyPath.triggered.connect(self._copy_path)
+        self.window.ui.actionCopyNodeId.triggered.connect(self._copy_nodeid)
+        # add items to context menu
+        self.window.ui.treeView.addAction(self.window.ui.actionCopyPath)
+        self.window.ui.treeView.addAction(self.window.ui.actionCopyNodeId)
 
     def clear(self):
         self.model.clear()
@@ -273,7 +278,34 @@ class TreeUI(object):
         self.model.clear()
         self.model.add_item(*self.uaclient.get_root_node_and_desc())
 
-    def get_current_node(self, idx):
+    def _copy_path(self):
+        path = self.get_current_path()
+        path = ",".join(path)
+        QApplication.clipboard().setText(path)
+
+    def _copy_nodeid(self):
+        node = self.get_current_node()
+        if node:
+            text = node.nodeid.to_string()
+        else:
+            text = ""
+        QApplication.clipboard().setText(text)
+
+    def get_current_path(self):
+        idx = self.window.ui.treeView.currentIndex()
+        idx = idx.sibling(idx.row(), 0)
+        it = self.model.itemFromIndex(idx)
+        path = []
+        while it and it.data():
+            node = it.data()
+            name = node.get_browse_name().to_string()
+            path.insert(0, name)
+            it = it.parent()
+        return path
+
+    def get_current_node(self, idx=None):
+        if idx is None:
+            idx = self.window.ui.treeView.currentIndex()
         idx = idx.sibling(idx.row(), 0)
         it = self.model.itemFromIndex(idx)
         if not it:
@@ -340,8 +372,6 @@ class Window(QMainWindow):
         QTimer.singleShot(1500, self.ui.statusBar.hide)
 
     def get_current_node(self, idx=None):
-        if idx is None:
-            idx = self.ui.treeView.currentIndex()
         return self.tree_ui.get_current_node(idx)
 
     def get_uaclient(self):
@@ -404,25 +434,25 @@ class TreeViewModel(QStandardItemModel):
         self.setHorizontalHeaderLabels(['DisplayName', "BrowseName", 'NodeId'])
 
     def add_item(self, node, desc, parent=None):
-        data = [QStandardItem(desc.DisplayName.to_string()), QStandardItem(desc.BrowseName.to_string()), QStandardItem(desc.NodeId.to_string())]
+        item = [QStandardItem(desc.DisplayName.to_string()), QStandardItem(desc.BrowseName.to_string()), QStandardItem(desc.NodeId.to_string())]
         if desc.NodeClass == ua.NodeClass.Object:
             if desc.TypeDefinition == ua.TwoByteNodeId(ua.ObjectIds.FolderType):
-                data[0].setIcon(QIcon(":/folder.svg"))
+                item[0].setIcon(QIcon(":/folder.svg"))
             else:
-                data[0].setIcon(QIcon(":/object.svg"))
+                item[0].setIcon(QIcon(":/object.svg"))
         elif desc.NodeClass == ua.NodeClass.Variable:
             if desc.TypeDefinition == ua.TwoByteNodeId(ua.ObjectIds.PropertyType):
-                data[0].setIcon(QIcon(":/property.svg"))
+                item[0].setIcon(QIcon(":/property.svg"))
             else:
-                data[0].setIcon(QIcon(":/variable.svg"))
+                item[0].setIcon(QIcon(":/variable.svg"))
         elif desc.NodeClass == ua.NodeClass.Method:
-                data[0].setIcon(QIcon(":/method.svg"))
+                item[0].setIcon(QIcon(":/method.svg"))
 
-        data[0].setData(node)
+        item[0].setData(node)
         if parent:
-            return parent.appendRow(data)
+            return parent.appendRow(item)
         else:
-            return self.appendRow(data)
+            return self.appendRow(item)
 
     def canFetchMore(self, idx):
         item = self.itemFromIndex(idx)
