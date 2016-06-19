@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 
 import sys
-import datetime
+from datetime import datetime
 from enum import Enum
 
 from PyQt5.QtCore import pyqtSignal, QTimer, Qt, QObject, QSettings, QModelIndex
@@ -9,6 +9,7 @@ from PyQt5.QtGui import QStandardItemModel, QStandardItem, QIcon
 from PyQt5.QtWidgets import QMainWindow, QWidget, QApplication, QAbstractItemView, QMenu, QAction
 
 from opcua import ua
+from opcua.common.ua_utils import string_to_variant, variant_to_string
 
 from freeopcuaclient.uaclient import UaClient
 from freeopcuaclient.mainwindow_ui import Ui_MainWindow
@@ -24,7 +25,7 @@ class DataChangeHandler(QObject):
         elif data.monitored_item.Value.ServerTimestamp:
             dato = data.monitored_item.Value.ServerTimestamp.isoformat()
         else:
-            dato = datetime.datetime.now().isoformat()
+            dato = datetime.now().isoformat()
         self.data_change_fired.emit(node, str(val), dato)
 
 
@@ -67,6 +68,7 @@ class EventUI(object):
             self.uaclient.subscribe_events(node, self._handler)
         except Exception as ex:
             self.window.show_error(ex)
+            raise
         else:
             self._subscribed_nodes.append(node)
 
@@ -125,6 +127,7 @@ class DataChangeUI(object):
             self.window.show_error(ex)
             idx = self.model.indexFromItem(row[0])
             self.model.takeRow(idx.row())
+            raise
 
     def _unsubscribe(self):
         node = self.window.get_current_node()
@@ -158,6 +161,8 @@ class AttrsUI(object):
         self.uaclient = uaclient
         self.model = QStandardItemModel()
         self.window.ui.attrView.setModel(self.model)
+        self.window.ui.attrView.doubleClicked.connect(self.edit_attr)
+        self.model.itemChanged.connect(self.edit_attr_finished)
         self.window.ui.attrView.header().setSectionResizeMode(1)
 
         self.window.ui.treeView.activated.connect(self.show_attrs)
@@ -171,6 +176,26 @@ class AttrsUI(object):
         copyaction.triggered.connect(self._copy_value)
         self._contextMenu = QMenu()
         self._contextMenu.addAction(copyaction)
+
+    def edit_attr(self, idx):
+        if idx.column() != 1:
+            return
+        attritem = self.model.item(idx.row(), 0)
+        if attritem.text() == "Value":
+            self.window.ui.attrView.edit(idx)
+
+    def edit_attr_finished(self, item):
+        try:
+            var = item.data()
+            val = item.text()
+            var = string_to_variant(val, var.VariantType)
+            self.current_node.set_value(var)
+        except Exception as ex:
+            self.window.show_error(ex)
+            raise
+        finally:
+            var = self.current_node.get_data_value().Value
+            item.setText(variant_to_string(var))
 
     def showContextMenu(self, position):
         item = self.get_current_item()
@@ -192,10 +217,10 @@ class AttrsUI(object):
     def show_attrs(self, idx):
         if not isinstance(idx, QModelIndex):
             idx = None
-        node = self.window.get_current_node(idx)
+        self.current_node = self.window.get_current_node(idx)
         self.model.clear()
-        if node:
-            self._show_attrs(node)
+        if self.current_node:
+            self._show_attrs(self.current_node)
 
     def _show_attrs(self, node):
         try:
@@ -203,19 +228,12 @@ class AttrsUI(object):
         except Exception as ex:
             self.window.show_error(ex)
             raise
-        self.model.setHorizontalHeaderLabels(['Attribute', 'Value'])
-        for k, v in attrs.items():
-            if isinstance(v, (ua.NodeId)):
-                v = str(v)
-            elif isinstance(v, (ua.QualifiedName, ua.LocalizedText)):
-                v = v.to_string()
-            elif isinstance(v, Enum):
-                v = repr(v)
-            elif isinstance(v, ua.DataValue):
-                v = repr(v)
-            else:
-                v = str(v)
-            self.model.appendRow([QStandardItem(k), QStandardItem(v)])
+        self.model.setHorizontalHeaderLabels(['Attribute', 'Value', 'DataType'])
+        for k, variant in attrs.items():
+            string = variant_to_string(variant)
+            vitem = QStandardItem(string)
+            vitem.setData(variant)
+            self.model.appendRow([QStandardItem(k), vitem, QStandardItem(variant.VariantType.name)])
 
 
 class RefsUI(object):

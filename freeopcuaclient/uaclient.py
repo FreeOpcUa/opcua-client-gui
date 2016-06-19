@@ -92,7 +92,7 @@ class UaClient(object):
         res = {}
         for idx, name in enumerate(names):
             if attrs[idx].StatusCode.is_good():
-                res[name] = attrs[idx].Value.Value
+                res[name] = attrs[idx].Value
         return res
 
     def get_all_refs(self, node):

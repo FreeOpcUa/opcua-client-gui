@@ -60,7 +60,7 @@
      <x>0</x>
      <y>0</y>
      <width>922</width>
-     <height>27</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuOPC_UA_Client">
@@ -116,6 +116,9 @@
       <widget class="QTreeView" name="attrView">
        <property name="sizeAdjustPolicy">
         <enum>QAbstractScrollArea::AdjustToContents</enum>
+       </property>
+       <property name="editTriggers">
+        <set>QAbstractItemView::NoEditTriggers</set>
        </property>
       </widget>
      </item>
@@ -228,6 +231,9 @@
        <property name="sizeAdjustPolicy">
         <enum>QAbstractScrollArea::AdjustToContents</enum>
        </property>
+       <property name="editTriggers">
+        <set>QAbstractItemView::NoEditTriggers</set>
+       </property>
        <property name="dragDropOverwriteMode">
         <bool>false</bool>
        </property>
@@ -261,7 +267,11 @@
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
-      <widget class="QTableView" name="refView"/>
+      <widget class="QTableView" name="refView">
+       <property name="editTriggers">
+        <set>QAbstractItemView::NoEditTriggers</set>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>
@@ -282,7 +292,11 @@
    <widget class="QWidget" name="dockWidgetContents_5">
     <layout class="QGridLayout" name="gridLayout_5">
      <item row="0" column="0">
-      <widget class="QListView" name="evView"/>
+      <widget class="QListView" name="evView">
+       <property name="editTriggers">
+        <set>QAbstractItemView::NoEditTriggers</set>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>

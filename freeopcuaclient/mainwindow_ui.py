@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'freeopcuaclient/mainwindow_ui.ui'
 #
-# Created by: PyQt5 UI code generator 5.4.2
+# Created by: PyQt5 UI code generator 5.5.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -43,7 +43,7 @@ class Ui_MainWindow(object):
         self.gridLayout_2.addWidget(self.splitter, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralWidget)
         self.menuBar = QtWidgets.QMenuBar(MainWindow)
-        self.menuBar.setGeometry(QtCore.QRect(0, 0, 922, 27))
+        self.menuBar.setGeometry(QtCore.QRect(0, 0, 922, 26))
         self.menuBar.setObjectName("menuBar")
         self.menuOPC_UA_Client = QtWidgets.QMenu(self.menuBar)
         self.menuOPC_UA_Client.setObjectName("menuOPC_UA_Client")
@@ -73,6 +73,7 @@ class Ui_MainWindow(object):
         self.gridLayout_4.setObjectName("gridLayout_4")
         self.attrView = QtWidgets.QTreeView(self.dockWidgetContents)
         self.attrView.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
+        self.attrView.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.attrView.setObjectName("attrView")
         self.gridLayout_4.addWidget(self.attrView, 0, 0, 1, 2)
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
@@ -141,6 +142,7 @@ class Ui_MainWindow(object):
         self.subView = QtWidgets.QTableView(self.dockWidgetContents_3)
         self.subView.setAcceptDrops(True)
         self.subView.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
+        self.subView.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.subView.setDragDropOverwriteMode(False)
         self.subView.setDragDropMode(QtWidgets.QAbstractItemView.DropOnly)
         self.subView.setObjectName("subView")
@@ -166,6 +168,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_2.setSpacing(6)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.refView = QtWidgets.QTableView(self.dockWidgetContents_4)
+        self.refView.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.refView.setObjectName("refView")
         self.verticalLayout_2.addWidget(self.refView)
         self.refDockWidget.setWidget(self.dockWidgetContents_4)
@@ -184,6 +187,7 @@ class Ui_MainWindow(object):
         self.gridLayout_5.setSpacing(6)
         self.gridLayout_5.setObjectName("gridLayout_5")
         self.evView = QtWidgets.QListView(self.dockWidgetContents_5)
+        self.evView.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.evView.setObjectName("evView")
         self.gridLayout_5.addWidget(self.evView, 0, 0, 1, 1)
         self.evDockWidget.setWidget(self.dockWidgetContents_5)
