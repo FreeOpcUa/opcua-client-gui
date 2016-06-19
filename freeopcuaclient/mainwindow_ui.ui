@@ -226,7 +226,7 @@
      <item row="0" column="0">
       <widget class="QTableView" name="subView">
        <property name="acceptDrops">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
        <property name="sizeAdjustPolicy">
         <enum>QAbstractScrollArea::AdjustToContents</enum>

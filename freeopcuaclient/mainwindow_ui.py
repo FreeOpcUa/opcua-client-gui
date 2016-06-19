@@ -140,7 +140,7 @@ class Ui_MainWindow(object):
         self.gridLayout_3.setSpacing(6)
         self.gridLayout_3.setObjectName("gridLayout_3")
         self.subView = QtWidgets.QTableView(self.dockWidgetContents_3)
-        self.subView.setAcceptDrops(True)
+        self.subView.setAcceptDrops(False)
         self.subView.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
         self.subView.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.subView.setDragDropOverwriteMode(False)
