@@ -15,11 +15,12 @@ What works:
 * make available on pip: sudo pip install freeopcua-client
 * remember connections and show connection history
 * subscribing to events
+* write variable node values
 
 TODO (listed after priority):
 
-* display datatype and timestamp in attribute view for variables
-* write node values
+* display timestamp in attribute view for DataValue objects
+* write attribute values
 * detect lost connection and automatically reconnect 
 * more human friendly refs display
 * gui for certificates
