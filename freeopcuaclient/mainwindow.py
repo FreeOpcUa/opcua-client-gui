@@ -229,11 +229,11 @@ class AttrsUI(object):
             self.window.show_error(ex)
             raise
         self.model.setHorizontalHeaderLabels(['Attribute', 'Value', 'DataType'])
-        for k, variant in attrs.items():
+        for name, variant in attrs:
             string = variant_to_string(variant)
             vitem = QStandardItem(string)
             vitem.setData(variant)
-            self.model.appendRow([QStandardItem(k), vitem, QStandardItem(variant.VariantType.name)])
+            self.model.appendRow([QStandardItem(name), vitem, QStandardItem(variant.VariantType.name)])
 
 
 class RefsUI(object):

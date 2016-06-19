@@ -89,10 +89,11 @@ class UaClient(object):
                 vals.append(val)
 
         attrs = node.get_attributes(vals)
-        res = {}
+        res = []
         for idx, name in enumerate(names):
             if attrs[idx].StatusCode.is_good():
-                res[name] = attrs[idx].Value
+                res.append((name, attrs[idx].Value))
+        res.sort()
         return res
 
     def get_all_refs(self, node):
