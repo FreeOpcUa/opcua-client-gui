@@ -9,7 +9,7 @@ from PyQt5.QtGui import QStandardItemModel, QStandardItem, QIcon
 from PyQt5.QtWidgets import QMainWindow, QWidget, QApplication, QAbstractItemView, QMenu, QAction
 
 from opcua import ua
-from opcua.common.ua_utils import string_to_variant, variant_to_string
+from opcua.common.ua_utils import string_to_variant, variant_to_string, val_to_string
 
 from freeopcuaclient.uaclient import UaClient
 from freeopcuaclient.mainwindow_ui import Ui_MainWindow
@@ -177,14 +177,28 @@ class AttrsUI(object):
         self._contextMenu = QMenu()
         self._contextMenu.addAction(copyaction)
 
+    def _check_edit(self, item):
+        """
+        filter only element we want to edit.
+        take either idx eller item as argument
+        """
+        if item.column() != 1:
+            return False
+        name_item = self.model.item(item.row(), 0)
+        if name_item.text() != "Value":
+            return False
+        return True
+
     def edit_attr(self, idx):
-        if idx.column() != 1:
+        if not self._check_edit(idx):
             return
         attritem = self.model.item(idx.row(), 0)
         if attritem.text() == "Value":
             self.window.ui.attrView.edit(idx)
 
     def edit_attr_finished(self, item):
+        if not self._check_edit(item):
+            return
         try:
             var = item.data()
             val = item.text()
@@ -194,8 +208,11 @@ class AttrsUI(object):
             self.window.show_error(ex)
             raise
         finally:
-            var = self.current_node.get_data_value().Value
-            item.setText(variant_to_string(var))
+            dv = self.current_node.get_data_value()
+            item.setText(variant_to_string(dv.Value))
+            name_item = self.model.item(item.row(), 0)
+            name_item.child(0, 1).setText(val_to_string(dv.ServerTimestamp))
+            name_item.child(1, 1).setText(val_to_string(dv.SourceTimestamp))
 
     def showContextMenu(self, position):
         item = self.get_current_item()
@@ -221,6 +238,7 @@ class AttrsUI(object):
         self.model.clear()
         if self.current_node:
             self._show_attrs(self.current_node)
+        self.window.ui.attrView.expandAll()
 
     def _show_attrs(self, node):
         try:
@@ -229,11 +247,18 @@ class AttrsUI(object):
             self.window.show_error(ex)
             raise
         self.model.setHorizontalHeaderLabels(['Attribute', 'Value', 'DataType'])
-        for name, variant in attrs:
-            string = variant_to_string(variant)
+        for name, dv in attrs:
+            string = variant_to_string(dv.Value)
+            name_item = QStandardItem(name)
             vitem = QStandardItem(string)
-            vitem.setData(variant)
-            self.model.appendRow([QStandardItem(name), vitem, QStandardItem(variant.VariantType.name)])
+            vitem.setData(dv.Value)
+            self.model.appendRow([name_item, vitem, QStandardItem(dv.Value.VariantType.name)])
+            if name == "Value":
+                string = val_to_string(dv.ServerTimestamp)
+                name_item.appendRow([QStandardItem("Server Timestamp"), QStandardItem(string), QStandardItem(ua.VariantType.DateTime.name)])
+                string = val_to_string(dv.SourceTimestamp)
+                name_item.appendRow([QStandardItem("Source Timestamp"), QStandardItem(string), QStandardItem(ua.VariantType.DateTime.name)])
+    
 
 
 class RefsUI(object):

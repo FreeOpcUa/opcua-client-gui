@@ -92,7 +92,7 @@ class UaClient(object):
         res = []
         for idx, name in enumerate(names):
             if attrs[idx].StatusCode.is_good():
-                res.append((name, attrs[idx].Value))
+                res.append((name, attrs[idx]))
         res.sort()
         return res
 

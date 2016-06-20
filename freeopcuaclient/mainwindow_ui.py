@@ -74,6 +74,8 @@ class Ui_MainWindow(object):
         self.attrView = QtWidgets.QTreeView(self.dockWidgetContents)
         self.attrView.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
         self.attrView.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.attrView.setAutoExpandDelay(-1)
+        self.attrView.setIndentation(18)
         self.attrView.setObjectName("attrView")
         self.gridLayout_4.addWidget(self.attrView, 0, 0, 1, 2)
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)

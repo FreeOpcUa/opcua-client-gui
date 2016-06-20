@@ -120,6 +120,12 @@
        <property name="editTriggers">
         <set>QAbstractItemView::NoEditTriggers</set>
        </property>
+       <property name="autoExpandDelay">
+        <number>-1</number>
+       </property>
+       <property name="indentation">
+        <number>18</number>
+       </property>
       </widget>
      </item>
      <item row="1" column="0">
