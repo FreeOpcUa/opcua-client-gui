@@ -398,7 +398,7 @@ class Window(QMainWindow):
         self.event_ui = EventUI(self, self.uaclient)
 
         self.resize(int(self.settings.value("main_window_width", 800)), int(self.settings.value("main_window_height", 600)))
-        self.restoreState(self.settings.value("main_window_state", b""))
+        self.restoreState(self.settings.value("main_window_state", b"", type="QByteArray"))
 
         self.ui.connectButton.clicked.connect(self._connect)
         self.ui.disconnectButton.clicked.connect(self._disconnect)
