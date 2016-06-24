@@ -76,6 +76,8 @@ class Ui_MainWindow(object):
         self.attrView.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.attrView.setAutoExpandDelay(-1)
         self.attrView.setIndentation(18)
+        self.attrView.setSortingEnabled(True)
+        self.attrView.setWordWrap(True)
         self.attrView.setObjectName("attrView")
         self.gridLayout_4.addWidget(self.attrView, 0, 0, 1, 2)
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)

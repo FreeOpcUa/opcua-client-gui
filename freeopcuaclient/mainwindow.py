@@ -250,6 +250,12 @@ class AttrsUI(object):
         for name, dv in attrs:
             if name == "DataType":
                 string = ua.DataType_to_VariantType(dv.Value.Value).name
+            elif name in ("AccessLevel", "UserAccessLevel"):
+                string = ",".join(ua.int_to_AccessLevel(dv.Value.Value))
+            elif name in ("WriteMask", "UserWriteMask"):
+                string = ",".join(ua.int_to_WriteMask(dv.Value.Value))
+            elif name in ("EventNotifier"):
+                string = ",".join(ua.int_to_EventNotifier(dv.Value.Value))
             else:
                 string = variant_to_string(dv.Value)
             name_item = QStandardItem(name)
@@ -315,7 +321,7 @@ class TreeUI(object):
         self.model.clear()  # FIXME: do we need this?
         self.model.error.connect(self.window.show_error)
         self.window.ui.treeView.setModel(self.model)
-        self.window.ui.treeView.setUniformRowHeights(True)
+        #self.window.ui.treeView.setUniformRowHeights(True)
         self.window.ui.treeView.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.window.ui.treeView.header().setSectionResizeMode(1)
         self.window.ui.actionCopyPath.triggered.connect(self._copy_path)
