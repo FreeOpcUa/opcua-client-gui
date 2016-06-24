@@ -248,7 +248,10 @@ class AttrsUI(object):
             raise
         self.model.setHorizontalHeaderLabels(['Attribute', 'Value', 'DataType'])
         for name, dv in attrs:
-            string = variant_to_string(dv.Value)
+            if name == "DataType":
+                string = ua.DataType_to_VariantType(dv.Value.Value).name
+            else:
+                string = variant_to_string(dv.Value)
             name_item = QStandardItem(name)
             vitem = QStandardItem(string)
             vitem.setData(dv.Value)
