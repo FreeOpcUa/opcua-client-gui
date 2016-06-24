@@ -290,10 +290,17 @@ class RefsUI(object):
             self.window.show_error(ex)
             raise
         for ref in refs:
-            self.model.appendRow([QStandardItem(str(ref.ReferenceTypeId)),
-                                  QStandardItem(str(ref.NodeId)),
-                                  QStandardItem(str(ref.BrowseName)),
-                                  QStandardItem(str(ref.TypeDefinition))])
+            typename = ua.ObjectIdNames[ref.ReferenceTypeId.Identifier]
+            if ref.NodeId.NamespaceIndex == 0 and ref.NodeId.Identifier in ua.ObjectIdNames:
+                nodeid = ua.ObjectIdNames[ref.NodeId.Identifier]
+            else:
+                nodeid = str(ref.NodeId)
+            typedef = ua.ObjectIdNames[ref.TypeDefinition.Identifier]
+            self.model.appendRow([QStandardItem(typename),
+                                  QStandardItem(nodeid),
+                                  QStandardItem(ref.BrowseName.to_string()),
+                                  QStandardItem(typedef)
+                                  ])
 
 
 class TreeUI(object):
