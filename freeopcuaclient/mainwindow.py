@@ -249,7 +249,12 @@ class AttrsUI(object):
         self.model.setHorizontalHeaderLabels(['Attribute', 'Value', 'DataType'])
         for name, dv in attrs:
             if name == "DataType":
-                string = ua.DataType_to_VariantType(dv.Value.Value).name
+                if dv.Value.Value.Identifier < 63:
+                    string = ua.DataType_to_VariantType(dv.Value.Value).name
+                elif dv.Value.Value.Identifier in ua.ObjectIdNames:
+                    string = ua.ObjectIdNames[dv.Value.Value.Identifier]
+                else:
+                    string = dv.Value.Value.to_string()
             elif name in ("AccessLevel", "UserAccessLevel"):
                 string = ",".join(ua.int_to_AccessLevel(dv.Value.Value))
             elif name in ("WriteMask", "UserWriteMask"):
