@@ -74,6 +74,8 @@ class Ui_MainWindow(object):
         self.attrView = QtWidgets.QTreeView(self.dockWidgetContents)
         self.attrView.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
         self.attrView.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.attrView.setProperty("showDropIndicator", False)
+        self.attrView.setTextElideMode(QtCore.Qt.ElideNone)
         self.attrView.setAutoExpandDelay(-1)
         self.attrView.setIndentation(18)
         self.attrView.setSortingEnabled(True)

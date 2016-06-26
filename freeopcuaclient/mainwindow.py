@@ -256,11 +256,11 @@ class AttrsUI(object):
                 else:
                     string = dv.Value.Value.to_string()
             elif name in ("AccessLevel", "UserAccessLevel"):
-                string = ",".join(ua.int_to_AccessLevel(dv.Value.Value))
+                string = ",".join([e.name for e in ua.int_to_AccessLevel(dv.Value.Value)])
             elif name in ("WriteMask", "UserWriteMask"):
-                string = ",".join(ua.int_to_WriteMask(dv.Value.Value))
+                string = ",".join([e.name for e in ua.int_to_WriteMask(dv.Value.Value)])
             elif name in ("EventNotifier"):
-                string = ",".join(ua.int_to_EventNotifier(dv.Value.Value))
+                string = ",".join([e.name for e in ua.int_to_EventNotifier(dv.Value.Value)])
             else:
                 string = variant_to_string(dv.Value)
             name_item = QStandardItem(name)
