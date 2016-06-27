@@ -308,8 +308,11 @@ class RefsUI(object):
             if ref.NodeId.NamespaceIndex == 0 and ref.NodeId.Identifier in ua.ObjectIdNames:
                 nodeid = ua.ObjectIdNames[ref.NodeId.Identifier]
             else:
-                nodeid = str(ref.NodeId)
-            typedef = ua.ObjectIdNames[ref.TypeDefinition.Identifier]
+                nodeid = ref.NodeId.to_string()
+            if ref.TypeDefinition.Identifier in ua.ObjectIdNames:
+                typedef = ua.ObjectIdNames[ref.TypeDefinition.Identifier]
+            else:
+                typedef = ref.TypeDefinition.to_string()
             self.model.appendRow([QStandardItem(typename),
                                   QStandardItem(nodeid),
                                   QStandardItem(ref.BrowseName.to_string()),
@@ -544,7 +547,7 @@ class TreeViewModel(QStandardItemModel):
 
     def _fetchMore(self, parent):
         try:
-            for node, attrs in self.uaclient.get_children(parent.data()):
+            for node, attrs in self.uaclient.get_children(parent.data()).items():
                 self.add_item(node, attrs, parent)
         except Exception as ex:
             self.error.emit(ex)

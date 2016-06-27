@@ -75,9 +75,9 @@ class UaClient(object):
 
     def get_children(self, node):
         descs = node.get_children_descriptions()
-        children = []
+        children = {}
         for desc in descs:
-            children.append((self.client.get_node(desc.NodeId), desc))
+            children[self.client.get_node(desc.NodeId)] = desc
         return children
 
     def get_all_attrs(self, node):
