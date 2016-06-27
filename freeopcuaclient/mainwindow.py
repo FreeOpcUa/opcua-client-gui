@@ -249,7 +249,7 @@ class AttrsUI(object):
         self.model.setHorizontalHeaderLabels(['Attribute', 'Value', 'DataType'])
         for name, dv in attrs:
             if name == "DataType":
-                if dv.Value.Value.Identifier < 63:
+                if isinstance(dv.Value.Value.Identifier, int) and dv.Value.Value.Identifier < 63:
                     string = ua.DataType_to_VariantType(dv.Value.Value).name
                 elif dv.Value.Value.Identifier in ua.ObjectIdNames:
                     string = ua.ObjectIdNames[dv.Value.Value.Identifier]
