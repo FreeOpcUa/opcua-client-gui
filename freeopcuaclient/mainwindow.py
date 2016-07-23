@@ -4,7 +4,7 @@ import sys
 from datetime import datetime
 from enum import Enum
 
-from PyQt5.QtCore import pyqtSignal, QTimer, Qt, QObject, QSettings, QModelIndex
+from PyQt5.QtCore import pyqtSignal, QTimer, Qt, QObject, QSettings, QModelIndex, QMimeData
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QIcon
 from PyQt5.QtWidgets import QMainWindow, QWidget, QApplication, QAbstractItemView, QMenu, QAction
 
@@ -103,20 +103,34 @@ class DataChangeUI(object):
 
         # handle subscriptions
         self._subhandler.data_change_fired.connect(self._update_subscription_model, type=Qt.QueuedConnection)
+        
+        # accept drops
+        self.model.canDropMimeData = self.canDropMimeData
+        self.model.dropMimeData = self.dropMimeData
+
+    def canDropMimeData(self, mdata, action, row, column, parent):
+        return True
+
+    def dropMimeData(self, mdata, action, row, column, parent):
+        node = self.uaclient.client.get_node(mdata.text())
+        self._subscribe(node)
+        return True
 
     def clear(self):
         self._subscribed_nodes = []
         self.model.clear()
 
-    def _subscribe(self):
-        node = self.window.get_current_node()
+    def _subscribe(self, node=None):
         if node is None:
-            return
+            node = self.window.get_current_node()
+            if node is None:
+                return
         if node in self._subscribed_nodes:
             print("allready subscribed to node: ", node)
             return
         self.model.setHorizontalHeaderLabels(["DisplayName", "Value", "Timestamp"])
-        row = [QStandardItem(node.display_name), QStandardItem("No Data yet"), QStandardItem("")]
+        text = str(node.get_display_name().Text)
+        row = [QStandardItem(text), QStandardItem("No Data yet"), QStandardItem("")]
         row[0].setData(node)
         self.model.appendRow(row)
         self._subscribed_nodes.append(node)
@@ -381,7 +395,6 @@ class TreeUI(object):
         if not node:
             print("No node for item:", it, it.text())
             return None
-        node.display_name = it.text()  # FIXME: hack
         return node
 
 
@@ -552,6 +565,35 @@ class TreeViewModel(QStandardItemModel):
         except Exception as ex:
             self.error.emit(ex)
             raise
+
+    #def flags(self, idx):
+        #item = self.itemFromIndex(idx)
+        #flags = QStandardItemModel.flags(self, idx)
+        #if not item:
+            #return flags
+        #node = item.data()
+        #if node and node.get_node_class() == ua.NodeClass.Variable:
+            ## FIXME not efficient to query, should be stored in data()
+            ##print(1, flags)
+            #return flags | Qt.ItemIsDropEnabled
+        #else:
+            #print(2, flags)
+            #return flags
+
+    #def mimeTypes(self):
+        #return ["application/vnd.text.list"]
+
+    def mimeData(self, idxs):
+        mdata = QMimeData()
+        nodes = []
+        for idx in idxs:
+            item = self.itemFromIndex(idx)
+            if item:
+                node = item.data()
+                if node:
+                    nodes.append(node.nodeid.to_string())
+        mdata.setText(", ".join(nodes))
+        return mdata
 
 
 def main():
