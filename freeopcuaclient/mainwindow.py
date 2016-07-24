@@ -52,17 +52,34 @@ class EventUI(object):
         self.window.ui.treeView.addAction(self.window.ui.actionUnsubscribeEvents)
         self._handler.event_fired.connect(self._update_event_model, type=Qt.QueuedConnection)
 
+        # accept drops
+        self.model.canDropMimeData = self.canDropMimeData
+        self.model.dropMimeData = self.dropMimeData
+
+    def canDropMimeData(self, mdata, action, row, column, parent):
+        return True
+
+    def dropMimeData(self, mdata, action, row, column, parent):
+        node = self.uaclient.client.get_node(mdata.text())
+        print("SUB 1", mdata.text(), node)
+        self._subscribe(node)
+        return True
+
+
     def clear(self):
         self._subscribed_nodes = []
         self.model.clear()
 
-    def _subscribe(self):
-        node = self.window.get_current_node()
-        if node is None:
-            return
+    def _subscribe(self, node=None):
+        print("SUB", node)
+        if not node:
+            node = self.window.get_current_node()
+            if node is None:
+                return
         if node in self._subscribed_nodes:
             print("allready subscribed to event for node: ", node)
             return
+        print("Subscribing to events for ", node)
         self.window.ui.evDockWidget.raise_()
         try:
             self.uaclient.subscribe_events(node, self._handler)
@@ -443,6 +460,15 @@ class Window(QMainWindow):
 
         self.ui.actionConnect.triggered.connect(self._connect)
         self.ui.actionDisconnect.triggered.connect(self._disconnect)
+
+        self.ui.modeComboBox.addItem("None")
+        self.ui.modeComboBox.addItem("Sign")
+        self.ui.modeComboBox.addItem("SignAndEncrypt")
+
+        self.ui.policyComboBox.addItem("None")
+        self.ui.policyComboBox.addItem("Basic128RSA15")
+        self.ui.policyComboBox.addItem("Basic256")
+        self.ui.policyComboBox.addItem("Basic256SHA256")
 
     def show_error(self, msg, level=1):
         print("showing error: ", msg, level)
