@@ -18,6 +18,9 @@ class UaClient(object):
         self._subs_dc = {}
         self._subs_ev = {}
 
+    def get_node(self, nodeid):
+        return self.client.get_node(nodeid)
+
     def connect(self, uri):
         self.disconnect()
         print("Connecting to ", uri)
@@ -56,7 +59,7 @@ class UaClient(object):
     def unsubscribe_events(self, node):
         self._event_sub.unsubscribe(self._subs_ev[node.nodeid])
 
-    def get_root_node_and_desc(self):
+    def get_root_desc(self):
         node = self.client.get_root_node()
         attrs = node.get_attributes([ua.AttributeIds.DisplayName, ua.AttributeIds.BrowseName, ua.AttributeIds.NodeId, ua.AttributeIds.NodeClass])
         desc = ua.ReferenceDescription()
@@ -65,7 +68,7 @@ class UaClient(object):
         desc.NodeId = attrs[2].Value.Value
         desc.NodeClass = attrs[3].Value.Value
         desc.TypeDefinition = ua.TwoByteNodeId(ua.ObjectIds.FolderType)
-        return node, desc
+        return desc
 
     def get_node_attrs(self, node):
         if not isinstance(node, Node):
@@ -75,10 +78,8 @@ class UaClient(object):
 
     def get_children(self, node):
         descs = node.get_children_descriptions()
-        children = {}
-        for desc in descs:
-            children[self.client.get_node(desc.NodeId)] = desc
-        return children
+        descs.sort(key=lambda x: x.BrowseName)
+        return descs
 
     def get_all_attrs(self, node):
         names = []

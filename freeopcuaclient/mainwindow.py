@@ -374,7 +374,7 @@ class TreeUI(object):
 
     def start(self):
         self.model.clear()
-        self.model.add_item(*self.uaclient.get_root_node_and_desc())
+        self.model.add_item(self.uaclient.get_root_desc())
 
     def _copy_path(self):
         path = self.get_current_path()
@@ -539,7 +539,7 @@ class TreeViewModel(QStandardItemModel):
         self._fetched = []
         self.setHorizontalHeaderLabels(['DisplayName', "BrowseName", 'NodeId'])
 
-    def add_item(self, node, desc, parent=None):
+    def add_item(self, desc, parent=None):
         item = [QStandardItem(desc.DisplayName.to_string()), QStandardItem(desc.BrowseName.to_string()), QStandardItem(desc.NodeId.to_string())]
         if desc.NodeClass == ua.NodeClass.Object:
             if desc.TypeDefinition == ua.TwoByteNodeId(ua.ObjectIds.FolderType):
@@ -554,7 +554,7 @@ class TreeViewModel(QStandardItemModel):
         elif desc.NodeClass == ua.NodeClass.Method:
                 item[0].setIcon(QIcon(":/method.svg"))
 
-        item[0].setData(node)
+        item[0].setData(self.uaclient.get_node(desc.NodeId))
         if parent:
             return parent.appendRow(item)
         else:
@@ -586,8 +586,9 @@ class TreeViewModel(QStandardItemModel):
 
     def _fetchMore(self, parent):
         try:
-            for node, attrs in self.uaclient.get_children(parent.data()).items():
-                self.add_item(node, attrs, parent)
+            descs = parent.data().get_children_descriptions()
+            for desc in descs:
+                self.add_item(desc, parent)
         except Exception as ex:
             self.error.emit(ex)
             raise
