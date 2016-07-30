@@ -59,17 +59,6 @@ class UaClient(object):
     def unsubscribe_events(self, node):
         self._event_sub.unsubscribe(self._subs_ev[node.nodeid])
 
-    def get_root_desc(self):
-        node = self.client.get_root_node()
-        attrs = node.get_attributes([ua.AttributeIds.DisplayName, ua.AttributeIds.BrowseName, ua.AttributeIds.NodeId, ua.AttributeIds.NodeClass])
-        desc = ua.ReferenceDescription()
-        desc.DisplayName = attrs[0].Value.Value
-        desc.BrowseName = attrs[1].Value.Value
-        desc.NodeId = attrs[2].Value.Value
-        desc.NodeClass = attrs[3].Value.Value
-        desc.TypeDefinition = ua.TwoByteNodeId(ua.ObjectIds.FolderType)
-        return desc
-
     def get_node_attrs(self, node):
         if not isinstance(node, Node):
             node = self.client.get_node(node)
@@ -80,22 +69,6 @@ class UaClient(object):
         descs = node.get_children_descriptions()
         descs.sort(key=lambda x: x.BrowseName)
         return descs
-
-    def get_all_attrs(self, node):
-        names = []
-        vals = []
-        for name, val in ua.AttributeIds.__dict__.items():
-            if not name.startswith("_"):
-                names.append(name)
-                vals.append(val)
-
-        attrs = node.get_attributes(vals)
-        res = []
-        for idx, name in enumerate(names):
-            if attrs[idx].StatusCode.is_good():
-                res.append((name, attrs[idx]))
-        res.sort()
-        return res
 
     def get_all_refs(self, node):
         return node.get_children_descriptions(refs=ua.ObjectIds.References)

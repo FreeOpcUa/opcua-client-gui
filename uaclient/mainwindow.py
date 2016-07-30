@@ -9,11 +9,12 @@ from PyQt5.QtGui import QStandardItemModel, QStandardItem, QIcon
 from PyQt5.QtWidgets import QMainWindow, QWidget, QApplication, QAbstractItemView, QMenu, QAction
 
 from opcua import ua
-from opcua.common.ua_utils import string_to_variant, variant_to_string, val_to_string
 
-from freeopcuaclient.uaclient import UaClient
-from freeopcuaclient.mainwindow_ui import Ui_MainWindow
-from freeopcuaclient import resources
+from uaclient.uaclient import UaClient
+from uaclient.mainwindow_ui import Ui_MainWindow
+from uaclient import resources
+from uawidgets.attrs_widget import AttrsWidget
+from uawidgets.tree_widget import TreeWidget
 
 
 class DataChangeHandler(QObject):
@@ -185,126 +186,6 @@ class DataChangeUI(object):
             i += 1
 
 
-class AttrsUI(object):
-
-    def __init__(self, window, uaclient):
-        self.window = window
-        self.uaclient = uaclient
-        self.model = QStandardItemModel()
-        self.window.ui.attrView.setModel(self.model)
-        self.window.ui.attrView.doubleClicked.connect(self.edit_attr)
-        self.model.itemChanged.connect(self.edit_attr_finished)
-        self.window.ui.attrView.header().setSectionResizeMode(1)
-
-        self.window.ui.treeView.activated.connect(self.show_attrs)
-        self.window.ui.treeView.clicked.connect(self.show_attrs)
-        self.window.ui.attrRefreshButton.clicked.connect(self.show_attrs)
-
-        # Context menu
-        self.window.ui.attrView.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.window.ui.attrView.customContextMenuRequested.connect(self.showContextMenu)
-        copyaction = QAction("&Copy Value", self.model)
-        copyaction.triggered.connect(self._copy_value)
-        self._contextMenu = QMenu()
-        self._contextMenu.addAction(copyaction)
-
-    def _check_edit(self, item):
-        """
-        filter only element we want to edit.
-        take either idx eller item as argument
-        """
-        if item.column() != 1:
-            return False
-        name_item = self.model.item(item.row(), 0)
-        if name_item.text() != "Value":
-            return False
-        return True
-
-    def edit_attr(self, idx):
-        if not self._check_edit(idx):
-            return
-        attritem = self.model.item(idx.row(), 0)
-        if attritem.text() == "Value":
-            self.window.ui.attrView.edit(idx)
-
-    def edit_attr_finished(self, item):
-        if not self._check_edit(item):
-            return
-        try:
-            var = item.data()
-            val = item.text()
-            var = string_to_variant(val, var.VariantType)
-            self.current_node.set_value(var)
-        except Exception as ex:
-            self.window.show_error(ex)
-            raise
-        finally:
-            dv = self.current_node.get_data_value()
-            item.setText(variant_to_string(dv.Value))
-            name_item = self.model.item(item.row(), 0)
-            name_item.child(0, 1).setText(val_to_string(dv.ServerTimestamp))
-            name_item.child(1, 1).setText(val_to_string(dv.SourceTimestamp))
-
-    def showContextMenu(self, position):
-        item = self.get_current_item()
-        if item:
-            self._contextMenu.exec_(self.window.ui.attrView.mapToGlobal(position))
-
-    def get_current_item(self, col_idx=0):
-        idx = self.window.ui.attrView.currentIndex()
-        return self.model.item(idx.row(), col_idx)
-
-    def _copy_value(self, position):
-        it = self.get_current_item(1)
-        if it:
-            QApplication.clipboard().setText(it.text())
-
-    def clear(self):
-        self.model.clear()
-
-    def show_attrs(self, idx):
-        if not isinstance(idx, QModelIndex):
-            idx = None
-        self.current_node = self.window.get_current_node(idx)
-        self.model.clear()
-        if self.current_node:
-            self._show_attrs(self.current_node)
-        self.window.ui.attrView.expandAll()
-
-    def _show_attrs(self, node):
-        try:
-            attrs = self.uaclient.get_all_attrs(node)
-        except Exception as ex:
-            self.window.show_error(ex)
-            raise
-        self.model.setHorizontalHeaderLabels(['Attribute', 'Value', 'DataType'])
-        for name, dv in attrs:
-            if name == "DataType":
-                if isinstance(dv.Value.Value.Identifier, int) and dv.Value.Value.Identifier < 63:
-                    string = ua.DataType_to_VariantType(dv.Value.Value).name
-                elif dv.Value.Value.Identifier in ua.ObjectIdNames:
-                    string = ua.ObjectIdNames[dv.Value.Value.Identifier]
-                else:
-                    string = dv.Value.Value.to_string()
-            elif name in ("AccessLevel", "UserAccessLevel"):
-                string = ",".join([e.name for e in ua.int_to_AccessLevel(dv.Value.Value)])
-            elif name in ("WriteMask", "UserWriteMask"):
-                string = ",".join([e.name for e in ua.int_to_WriteMask(dv.Value.Value)])
-            elif name in ("EventNotifier"):
-                string = ",".join([e.name for e in ua.int_to_EventNotifier(dv.Value.Value)])
-            else:
-                string = variant_to_string(dv.Value)
-            name_item = QStandardItem(name)
-            vitem = QStandardItem(string)
-            vitem.setData(dv.Value)
-            self.model.appendRow([name_item, vitem, QStandardItem(dv.Value.VariantType.name)])
-            if name == "Value":
-                string = val_to_string(dv.ServerTimestamp)
-                name_item.appendRow([QStandardItem("Server Timestamp"), QStandardItem(string), QStandardItem(ua.VariantType.DateTime.name)])
-                string = val_to_string(dv.SourceTimestamp)
-                name_item.appendRow([QStandardItem("Source Timestamp"), QStandardItem(string), QStandardItem(ua.VariantType.DateTime.name)])
-    
-
 
 class RefsUI(object):
 
@@ -350,71 +231,6 @@ class RefsUI(object):
                                   QStandardItem(typedef)
                                   ])
 
-
-class TreeUI(object):
-
-    def __init__(self, window, uaclient):
-        self.window = window
-        self.uaclient = uaclient
-        self.model = TreeViewModel(self.uaclient)
-        self.model.clear()  # FIXME: do we need this?
-        self.model.error.connect(self.window.show_error)
-        self.window.ui.treeView.setModel(self.model)
-        #self.window.ui.treeView.setUniformRowHeights(True)
-        self.window.ui.treeView.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.window.ui.treeView.header().setSectionResizeMode(1)
-        self.window.ui.actionCopyPath.triggered.connect(self._copy_path)
-        self.window.ui.actionCopyNodeId.triggered.connect(self._copy_nodeid)
-        # add items to context menu
-        self.window.ui.treeView.addAction(self.window.ui.actionCopyPath)
-        self.window.ui.treeView.addAction(self.window.ui.actionCopyNodeId)
-
-    def clear(self):
-        self.model.clear()
-
-    def start(self):
-        self.model.clear()
-        self.model.add_item(self.uaclient.get_root_desc())
-
-    def _copy_path(self):
-        path = self.get_current_path()
-        path = ",".join(path)
-        QApplication.clipboard().setText(path)
-
-    def _copy_nodeid(self):
-        node = self.get_current_node()
-        if node:
-            text = node.nodeid.to_string()
-        else:
-            text = ""
-        QApplication.clipboard().setText(text)
-
-    def get_current_path(self):
-        idx = self.window.ui.treeView.currentIndex()
-        idx = idx.sibling(idx.row(), 0)
-        it = self.model.itemFromIndex(idx)
-        path = []
-        while it and it.data():
-            node = it.data()
-            name = node.get_browse_name().to_string()
-            path.insert(0, name)
-            it = it.parent()
-        return path
-
-    def get_current_node(self, idx=None):
-        if idx is None:
-            idx = self.window.ui.treeView.currentIndex()
-        idx = idx.sibling(idx.row(), 0)
-        it = self.model.itemFromIndex(idx)
-        if not it:
-            return None
-        node = it.data()
-        if not node:
-            print("No node for item:", it, it.text())
-            return None
-        return node
-
-
 class Window(QMainWindow):
 
     def __init__(self):
@@ -445,11 +261,24 @@ class Window(QMainWindow):
 
         self.uaclient = UaClient()
 
-        self.tree_ui = TreeUI(self, self.uaclient)
+        self.tree_ui = TreeWidget(self.ui.treeView)
         self.refs_ui = RefsUI(self, self.uaclient)
-        self.attrs_ui = AttrsUI(self, self.uaclient)
+        self.attrs_ui = AttrsWidget(self.ui.attrView)
         self.datachange_ui = DataChangeUI(self, self.uaclient)
         self.event_ui = EventUI(self, self.uaclient)
+
+
+        self.ui.actionCopyPath.triggered.connect(self.tree_ui.copy_path)
+        self.ui.actionCopyNodeId.triggered.connect(self.tree_ui.copy_nodeid)
+        # add items to context menu
+        self.ui.treeView.addAction(self.ui.actionCopyPath)
+        self.ui.treeView.addAction(self.ui.actionCopyNodeId)
+
+
+        self.ui.treeView.activated.connect(self.show_attrs)
+        self.ui.treeView.clicked.connect(self.show_attrs)
+        self.ui.attrRefreshButton.clicked.connect(self.show_attrs)
+
 
         self.resize(int(self.settings.value("main_window_width", 800)), int(self.settings.value("main_window_height", 600)))
         self.restoreState(self.settings.value("main_window_state", b"", type="QByteArray"))
@@ -469,6 +298,12 @@ class Window(QMainWindow):
         self.ui.policyComboBox.addItem("Basic128RSA15")
         self.ui.policyComboBox.addItem("Basic256")
         self.ui.policyComboBox.addItem("Basic256SHA256")
+    
+    def show_attrs(self, idx):
+        if not isinstance(idx, QModelIndex):
+            idx = None
+        node = self.get_current_node(idx)
+        self.attrs_ui.show_attrs(node)
 
     def show_error(self, msg, level=1):
         print("showing error: ", msg, level)
@@ -492,7 +327,7 @@ class Window(QMainWindow):
             raise
 
         self._update_address_list(uri)
-        self.tree_ui.start()
+        self.tree_ui.start(self.uaclient.client)
 
     def _update_address_list(self, uri):
         if uri == self._address_list[0]:
@@ -523,104 +358,6 @@ class Window(QMainWindow):
         self.settings.setValue("address_list", self._address_list)
         self._disconnect()
         event.accept()
-
-
-class TreeViewModel(QStandardItemModel):
-
-    error = pyqtSignal(str)
-
-    def __init__(self, uaclient):
-        super(TreeViewModel, self).__init__()
-        self.uaclient = uaclient
-        self._fetched = []
-
-    def clear(self):
-        QStandardItemModel.clear(self)
-        self._fetched = []
-        self.setHorizontalHeaderLabels(['DisplayName', "BrowseName", 'NodeId'])
-
-    def add_item(self, desc, parent=None):
-        item = [QStandardItem(desc.DisplayName.to_string()), QStandardItem(desc.BrowseName.to_string()), QStandardItem(desc.NodeId.to_string())]
-        if desc.NodeClass == ua.NodeClass.Object:
-            if desc.TypeDefinition == ua.TwoByteNodeId(ua.ObjectIds.FolderType):
-                item[0].setIcon(QIcon(":/folder.svg"))
-            else:
-                item[0].setIcon(QIcon(":/object.svg"))
-        elif desc.NodeClass == ua.NodeClass.Variable:
-            if desc.TypeDefinition == ua.TwoByteNodeId(ua.ObjectIds.PropertyType):
-                item[0].setIcon(QIcon(":/property.svg"))
-            else:
-                item[0].setIcon(QIcon(":/variable.svg"))
-        elif desc.NodeClass == ua.NodeClass.Method:
-                item[0].setIcon(QIcon(":/method.svg"))
-
-        item[0].setData(self.uaclient.get_node(desc.NodeId))
-        if parent:
-            return parent.appendRow(item)
-        else:
-            return self.appendRow(item)
-
-    def canFetchMore(self, idx):
-        item = self.itemFromIndex(idx)
-        if not item:
-            return True
-        node = item.data()
-        if node not in self._fetched:
-            self._fetched.append(node)
-            return True
-        return False
-
-    def hasChildren(self, idx):
-        item = self.itemFromIndex(idx)
-        if not item:
-            return True
-        node = item.data()
-        if node in self._fetched:
-            return QStandardItemModel.hasChildren(self, idx)
-        return True
-
-    def fetchMore(self, idx):
-        parent = self.itemFromIndex(idx)
-        if parent:
-            self._fetchMore(parent)
-
-    def _fetchMore(self, parent):
-        try:
-            descs = parent.data().get_children_descriptions()
-            for desc in descs:
-                self.add_item(desc, parent)
-        except Exception as ex:
-            self.error.emit(ex)
-            raise
-
-    #def flags(self, idx):
-        #item = self.itemFromIndex(idx)
-        #flags = QStandardItemModel.flags(self, idx)
-        #if not item:
-            #return flags
-        #node = item.data()
-        #if node and node.get_node_class() == ua.NodeClass.Variable:
-            ## FIXME not efficient to query, should be stored in data()
-            ##print(1, flags)
-            #return flags | Qt.ItemIsDropEnabled
-        #else:
-            #print(2, flags)
-            #return flags
-
-    #def mimeTypes(self):
-        #return ["application/vnd.text.list"]
-
-    def mimeData(self, idxs):
-        mdata = QMimeData()
-        nodes = []
-        for idx in idxs:
-            item = self.itemFromIndex(idx)
-            if item:
-                node = item.data()
-                if node:
-                    nodes.append(node.nodeid.to_string())
-        mdata.setText(", ".join(nodes))
-        return mdata
 
 
 def main():
