@@ -1,15 +1,15 @@
 from setuptools import setup, find_packages
 
 
-setup(name="freeopcua-client",
+setup(name="opcua-client",
       version="0.4.5",
       description="Minimal OPC-UA Client GUI",
       author="Olivier R-D",
       url='https://github.com/FreeOpcUa/opcua-client-gui',
-      packages=["freeopcuaclient"],
+      packages=["uaclient"],
       license="GNU General Public License",
-      install_requires=["freeopcua"],
+      install_requires=["freeopcua", "opcua-widgets"],
       entry_points={'console_scripts':
-                    ['freeopcua-client = freeopcuaclient.mainwindow:main']
+                    ['opcua-client = uaclient.mainwindow:main']
                     }
       )
