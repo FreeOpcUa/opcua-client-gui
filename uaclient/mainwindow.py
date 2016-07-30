@@ -15,6 +15,7 @@ from uaclient.mainwindow_ui import Ui_MainWindow
 from uaclient import resources
 from uawidgets.attrs_widget import AttrsWidget
 from uawidgets.tree_widget import TreeWidget
+from uawidgets.refs_widget import RefsWidget
 
 
 class DataChangeHandler(QObject):
@@ -186,51 +187,6 @@ class DataChangeUI(object):
             i += 1
 
 
-
-class RefsUI(object):
-
-    def __init__(self, window, uaclient):
-        self.window = window
-        self.uaclient = uaclient
-        self.model = QStandardItemModel()
-        self.window.ui.refView.setModel(self.model)
-        self.window.ui.refView.horizontalHeader().setSectionResizeMode(1)
-
-        self.window.ui.treeView.activated.connect(self.show_refs)
-        self.window.ui.treeView.clicked.connect(self.show_refs)
-
-    def clear(self):
-        self.model.clear()
-
-    def show_refs(self, idx):
-        node = self.window.get_current_node(idx)
-        self.model.clear()
-        if node:
-            self._show_refs(node)
-
-    def _show_refs(self, node):
-        self.model.setHorizontalHeaderLabels(['ReferenceType', 'NodeId', "BrowseName", "TypeDefinition"])
-        try:
-            refs = self.uaclient.get_all_refs(node)
-        except Exception as ex:
-            self.window.show_error(ex)
-            raise
-        for ref in refs:
-            typename = ua.ObjectIdNames[ref.ReferenceTypeId.Identifier]
-            if ref.NodeId.NamespaceIndex == 0 and ref.NodeId.Identifier in ua.ObjectIdNames:
-                nodeid = ua.ObjectIdNames[ref.NodeId.Identifier]
-            else:
-                nodeid = ref.NodeId.to_string()
-            if ref.TypeDefinition.Identifier in ua.ObjectIdNames:
-                typedef = ua.ObjectIdNames[ref.TypeDefinition.Identifier]
-            else:
-                typedef = ref.TypeDefinition.to_string()
-            self.model.appendRow([QStandardItem(typename),
-                                  QStandardItem(nodeid),
-                                  QStandardItem(ref.BrowseName.to_string()),
-                                  QStandardItem(typedef)
-                                  ])
-
 class Window(QMainWindow):
 
     def __init__(self):
@@ -262,12 +218,16 @@ class Window(QMainWindow):
         self.uaclient = UaClient()
 
         self.tree_ui = TreeWidget(self.ui.treeView)
-        self.refs_ui = RefsUI(self, self.uaclient)
+        self.tree_ui.error.connect(self.show_error)
+        self.refs_ui = RefsWidget(self.ui.refView)
+        self.refs_ui.error.connect(self.show_error)
         self.attrs_ui = AttrsWidget(self.ui.attrView)
+        self.attrs_ui.error.connect(self.show_error)
         self.datachange_ui = DataChangeUI(self, self.uaclient)
         self.event_ui = EventUI(self, self.uaclient)
 
-
+        self.ui.treeView.activated.connect(self.show_refs)
+        self.ui.treeView.clicked.connect(self.show_refs)
         self.ui.actionCopyPath.triggered.connect(self.tree_ui.copy_path)
         self.ui.actionCopyNodeId.triggered.connect(self.tree_ui.copy_nodeid)
         # add items to context menu
@@ -298,12 +258,18 @@ class Window(QMainWindow):
         self.ui.policyComboBox.addItem("Basic128RSA15")
         self.ui.policyComboBox.addItem("Basic256")
         self.ui.policyComboBox.addItem("Basic256SHA256")
+
+    def show_refs(self, idx):
+        node = self.get_current_node(idx)
+        if node:
+            self.refs_ui.show_refs(node)
     
     def show_attrs(self, idx):
         if not isinstance(idx, QModelIndex):
             idx = None
         node = self.get_current_node(idx)
-        self.attrs_ui.show_attrs(node)
+        if node:
+            self.attrs_ui.show_attrs(node)
 
     def show_error(self, msg, level=1):
         print("showing error: ", msg, level)

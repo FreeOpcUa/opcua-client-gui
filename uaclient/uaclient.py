@@ -70,5 +70,3 @@ class UaClient(object):
         descs.sort(key=lambda x: x.BrowseName)
         return descs
 
-    def get_all_refs(self, node):
-        return node.get_children_descriptions(refs=ua.ObjectIds.References)
