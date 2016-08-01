@@ -293,7 +293,7 @@ class Window(QMainWindow):
             raise
 
         self._update_address_list(uri)
-        self.tree_ui.start(self.uaclient.client)
+        self.tree_ui.set_root_node(self.uaclient.client.get_root_node())
 
     def _update_address_list(self, uri):
         if uri == self._address_list[0]:
