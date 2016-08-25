@@ -4,7 +4,7 @@ import sys
 from datetime import datetime
 from enum import Enum
 
-from PyQt5.QtCore import pyqtSignal, QTimer, Qt, QObject, QSettings, QModelIndex, QMimeData
+from PyQt5.QtCore import pyqtSignal, QTimer, Qt, QObject, QSettings, QModelIndex, QMimeData, QCoreApplication
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QIcon
 from PyQt5.QtWidgets import QMainWindow, QWidget, QApplication, QAbstractItemView, QMenu, QAction
 
@@ -206,8 +206,11 @@ class Window(QMainWindow):
         # we only show statusbar in case of errors
         self.ui.statusBar.hide()
 
-        # load settings, seconds arg is default
-        self.settings = QSettings("FreeOpcUa", "FreeOpcUaClient")
+        # setup QSettings for application and get a settings object
+        QCoreApplication.setOrganizationName("FreeOpcUa")
+        QCoreApplication.setApplicationName("OpcUaClient")
+        self.settings = QSettings()
+
         self._address_list = self.settings.value("address_list", ["opc.tcp://localhost:4840", "opc.tcp://localhost:53530/OPCUA/SimulationServer/"])
         self._address_list_max_count = int(self.settings.value("address_list_max_count", 10))
 
@@ -234,14 +237,14 @@ class Window(QMainWindow):
         self.ui.treeView.addAction(self.ui.actionCopyPath)
         self.ui.treeView.addAction(self.ui.actionCopyNodeId)
 
-
         self.ui.treeView.activated.connect(self.show_attrs)
         self.ui.treeView.clicked.connect(self.show_attrs)
         self.ui.attrRefreshButton.clicked.connect(self.show_attrs)
 
-
         self.resize(int(self.settings.value("main_window_width", 800)), int(self.settings.value("main_window_height", 600)))
-        self.restoreState(self.settings.value("main_window_state", b"", type="QByteArray"))
+        data = self.settings.value("main_window_state", None)
+        if data:
+            self.restoreState(data)
 
         self.ui.connectButton.clicked.connect(self._connect)
         self.ui.disconnectButton.clicked.connect(self._disconnect)
@@ -318,6 +321,8 @@ class Window(QMainWindow):
             self.event_ui.clear()
 
     def closeEvent(self, event):
+        self.attrs_ui.save_state()
+        self.refs_ui.save_state()
         self.settings.setValue("main_window_width", self.size().width())
         self.settings.setValue("main_window_height", self.size().height())
         self.settings.setValue("main_window_state", self.saveState())
