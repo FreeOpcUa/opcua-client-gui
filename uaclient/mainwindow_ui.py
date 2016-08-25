@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'freeopcuaclient/mainwindow_ui.ui'
+# Form implementation generated from reading ui file 'uaclient/mainwindow_ui.ui'
 #
 # Created by: PyQt5 UI code generator 5.5.1
 #
@@ -73,7 +73,7 @@ class Ui_MainWindow(object):
         self.gridLayout_4.setObjectName("gridLayout_4")
         self.attrView = QtWidgets.QTreeView(self.dockWidgetContents)
         self.attrView.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
-        self.attrView.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.attrView.setEditTriggers(QtWidgets.QAbstractItemView.AllEditTriggers)
         self.attrView.setProperty("showDropIndicator", False)
         self.attrView.setTextElideMode(QtCore.Qt.ElideNone)
         self.attrView.setAutoExpandDelay(-1)
