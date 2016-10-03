@@ -3,6 +3,7 @@ MANIFEST
 .idea*
 htmlcov*
 _*
+!__init__.py
 docs/_*
 *.pyc
 dist
