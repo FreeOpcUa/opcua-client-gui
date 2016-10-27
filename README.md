@@ -23,4 +23,21 @@ TODO (listed after priority):
 * gui for certificates
 * gui for encryption 
 
+# How to Install  
+
+*Note: PyQT 5 is required.*
+
+### Linux:
+
+1. Make sure python and python-pip is installed  
+2. `pip3 install freeopcua-client`  
+4. Run with: `freeopcua-client`  
+  
+### Windows:  
+
+1. Install winpython https://winpython.github.io/  
+3. Use pip to install freeopcua-client: `pip install freeopcua-client`  
+4. Run via the script pip created: `YOUR_INSTALL_PATH\Python\Python35\Scripts\opcua-modeler.exe`  
+
+To update to the latest release run: `pip install freeopcua-client --upgrade`
 
