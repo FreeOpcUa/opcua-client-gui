@@ -31,11 +31,22 @@ class TestClient(unittest.TestCase):
         self.client.disconnect()
         self.server.stop()
 
+    def get_attr_value(self, text):
+        idxlist = self.client.attrs_ui.model.match(self.client.attrs_ui.model.index(0, 0), Qt.DisplayRole, text,  1, Qt.MatchExactly | Qt.MatchRecursive)
+        idx = idxlist[0]
+        idx = idx.sibling(idx.row(), 1)
+        item = self.client.attrs_ui.model.itemFromIndex(idx)
+        return item.data(Qt.UserRole).value
+
+
     def test_select_objects(self):
         objects = self.server.nodes.objects
         self.client.tree_ui.set_current_node("Objects")
         self.assertEqual(objects, self.client.tree_ui.get_current_node())
+        self.assertGreater(self.client.attrs_ui.model.rowCount(), 6)
 
+        data = self.get_attr_value("NodeId")
+        self.assertEqual(data, objects.nodeid)
 
 
 if __name__ == "__main__":
