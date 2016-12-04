@@ -1,7 +1,7 @@
 Simple OPC-UA GUI client.
 
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/FreeOpcUa/opcua-client-gui/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/FreeOpcUa/opcua-client-gui/?branch=master)
-[![Build Status](https://travis-ci.org/FreeOpcUa/opcua-cliet-gui.svg?branch=master)](https://travis-ci.org/FreeOpcUa/opcua-client-gui)
+[![Build Status](https://travis-ci.org/FreeOpcUa/opcua-client-gui.svg?branch=master)](https://travis-ci.org/FreeOpcUa/opcua-client-gui)
 
 Written using freeopcua python api and pyqt. Basic functionnalities are implemented including subscribing for data changes and events, write variable values listing attributes and references.
 
