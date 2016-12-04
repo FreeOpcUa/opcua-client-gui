@@ -246,12 +246,12 @@ class Window(QMainWindow):
         if data:
             self.restoreState(data)
 
-        self.ui.connectButton.clicked.connect(self._connect)
-        self.ui.disconnectButton.clicked.connect(self._disconnect)
+        self.ui.connectButton.clicked.connect(self.connect)
+        self.ui.disconnectButton.clicked.connect(self.disconnect)
         # self.ui.treeView.expanded.connect(self._fit)
 
-        self.ui.actionConnect.triggered.connect(self._connect)
-        self.ui.actionDisconnect.triggered.connect(self._disconnect)
+        self.ui.actionConnect.triggered.connect(self.connect)
+        self.ui.actionDisconnect.triggered.connect(self.disconnect)
 
         self.ui.modeComboBox.addItem("None")
         self.ui.modeComboBox.addItem("Sign")
@@ -287,7 +287,7 @@ class Window(QMainWindow):
     def get_uaclient(self):
         return self.uaclient
 
-    def _connect(self):
+    def connect(self):
         uri = self.ui.addrComboBox.currentText()
         try:
             self.uaclient.connect(uri)
@@ -307,7 +307,7 @@ class Window(QMainWindow):
         if len(self._address_list) > self._address_list_max_count:
             self._address_list.pop(-1)
 
-    def _disconnect(self):
+    def disconnect(self):
         try:
             self.uaclient.disconnect()
         except Exception as ex:
@@ -327,7 +327,7 @@ class Window(QMainWindow):
         self.settings.setValue("main_window_height", self.size().height())
         self.settings.setValue("main_window_state", self.saveState())
         self.settings.setValue("address_list", self._address_list)
-        self._disconnect()
+        self.disconnect()
         event.accept()
 
 
