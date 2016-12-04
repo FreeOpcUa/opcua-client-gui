@@ -2,7 +2,9 @@
 
 import sys
 from datetime import datetime
+import inspect
 from enum import Enum
+import logging
 
 from PyQt5.QtCore import pyqtSignal, QTimer, Qt, QObject, QSettings, QModelIndex, QMimeData, QCoreApplication
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QIcon
@@ -16,6 +18,10 @@ from uawidgets import resources
 from uawidgets.attrs_widget import AttrsWidget
 from uawidgets.tree_widget import TreeWidget
 from uawidgets.refs_widget import RefsWidget
+from uawidgets.utils import trycatchslot
+
+
+logger = logging.getLogger(__name__)
 
 
 class DataChangeHandler(QObject):
@@ -61,27 +67,29 @@ class EventUI(object):
     def canDropMimeData(self, mdata, action, row, column, parent):
         return True
 
+    def show_error(self, *args):
+        self.window.show_error(*args)
+
     def dropMimeData(self, mdata, action, row, column, parent):
         node = self.uaclient.client.get_node(mdata.text())
-        print("SUB 1", mdata.text(), node)
         self._subscribe(node)
         return True
-
 
     def clear(self):
         self._subscribed_nodes = []
         self.model.clear()
 
+    @trycatchslot
     def _subscribe(self, node=None):
-        print("SUB", node)
+        logger.info("Subscribing to %s", node)
         if not node:
             node = self.window.get_current_node()
             if node is None:
                 return
         if node in self._subscribed_nodes:
-            print("allready subscribed to event for node: ", node)
+            logger.info("allready subscribed to event for node: %s", node)
             return
-        print("Subscribing to events for ", node)
+        logger.info("Subscribing to events for %s", node)
         self.window.ui.evDockWidget.raise_()
         try:
             self.uaclient.subscribe_events(node, self._handler)
@@ -91,6 +99,7 @@ class EventUI(object):
         else:
             self._subscribed_nodes.append(node)
 
+    @trycatchslot
     def _unsubscribe(self):
         node = self.window.get_current_node()
         if node is None:
@@ -98,6 +107,7 @@ class EventUI(object):
         self._subscribed_nodes.remove(node)
         self.uaclient.unsubscribe_events(node)
 
+    @trycatchslot
     def _update_event_model(self, event):
         self.model.appendRow([QStandardItem(str(event))])
 
@@ -139,13 +149,17 @@ class DataChangeUI(object):
         self._subscribed_nodes = []
         self.model.clear()
 
+    def show_error(self, *args):
+        self.window.show_error(*args)
+
+    @trycatchslot
     def _subscribe(self, node=None):
         if node is None:
             node = self.window.get_current_node()
             if node is None:
                 return
         if node in self._subscribed_nodes:
-            print("allready subscribed to node: ", node)
+            logger.warning("allready subscribed to node: %s ", node)
             return
         self.model.setHorizontalHeaderLabels(["DisplayName", "Value", "Timestamp"])
         text = str(node.get_display_name().Text)
@@ -162,6 +176,7 @@ class DataChangeUI(object):
             self.model.takeRow(idx.row())
             raise
 
+    @trycatchslot
     def _unsubscribe(self):
         node = self.window.get_current_node()
         if node is None:
@@ -262,11 +277,13 @@ class Window(QMainWindow):
         self.ui.policyComboBox.addItem("Basic256")
         self.ui.policyComboBox.addItem("Basic256SHA256")
 
+    @trycatchslot
     def show_refs(self, idx):
         node = self.get_current_node(idx)
         if node:
             self.refs_ui.show_refs(node)
     
+    @trycatchslot
     def show_attrs(self, idx):
         if not isinstance(idx, QModelIndex):
             idx = None
@@ -274,8 +291,8 @@ class Window(QMainWindow):
         if node:
             self.attrs_ui.show_attrs(node)
 
-    def show_error(self, msg, level=1):
-        print("showing error: ", msg, level)
+    def show_error(self, msg):
+        logger.warning("showing error: %s")
         self.ui.statusBar.show()
         self.ui.statusBar.setStyleSheet("QStatusBar { background-color : red; color : black; }")
         self.ui.statusBar.showMessage(str(msg))
