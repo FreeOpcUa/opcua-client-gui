@@ -14,6 +14,7 @@ from opcua import ua
 
 from uaclient.uaclient import UaClient
 from uaclient.mainwindow_ui import Ui_MainWindow
+from uaclient.connection_dialog import ConnectionDialog
 from uawidgets import resources
 from uawidgets.attrs_widget import AttrsWidget
 from uawidgets.tree_widget import TreeWidget
@@ -268,14 +269,8 @@ class Window(QMainWindow):
         self.ui.actionConnect.triggered.connect(self.connect)
         self.ui.actionDisconnect.triggered.connect(self.disconnect)
 
-        self.ui.modeComboBox.addItem("None")
-        self.ui.modeComboBox.addItem("Sign")
-        self.ui.modeComboBox.addItem("SignAndEncrypt")
-
-        self.ui.policyComboBox.addItem("None")
-        self.ui.policyComboBox.addItem("Basic128RSA15")
-        self.ui.policyComboBox.addItem("Basic256")
-        self.ui.policyComboBox.addItem("Basic256SHA256")
+        self.connection_dialog = ConnectionDialog(self)
+        self.ui.connectOptionButton.clicked.connect(self.connection_dialog.show)
 
     @trycatchslot
     def show_refs(self, idx):
@@ -344,6 +339,7 @@ class Window(QMainWindow):
         self.settings.setValue("main_window_height", self.size().height())
         self.settings.setValue("main_window_state", self.saveState())
         self.settings.setValue("address_list", self._address_list)
+        self.connection_dialog.save_state()
         self.disconnect()
         event.accept()
 
