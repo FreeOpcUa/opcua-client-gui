@@ -18,12 +18,13 @@ What works:
 * remember connections and show connection history
 * subscribing to events
 * write variable node values
+* gui for certificates
+* gui for encryption 
 
 TODO (listed after priority):
 
 * detect lost connection and automatically reconnect 
-* gui for certificates
-* gui for encryption 
+* gui for loging with certificate or user/password (can currently be done by writting them in uri)
 
 # How to Install  
 
