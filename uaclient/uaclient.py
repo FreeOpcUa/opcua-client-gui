@@ -1,32 +1,78 @@
+import logging
+
+from PyQt5.QtCore import QSettings
 
 from opcua import ua
 from opcua import Client
 from opcua import Node
+from opcua import crypto
+
+
+logger = logging.getLogger(__name__)
 
 
 class UaClient(object):
     """
     OPC-Ua client specialized for the need of GUI client
-    return exactly whant GUI needs, no customization possible
+    return exactly what GUI needs, no customization possible
     """
 
     def __init__(self):
+        self.settings = QSettings()
         self.client = None
         self._connected = False
         self._datachange_sub = None
         self._event_sub = None
         self._subs_dc = {}
         self._subs_ev = {}
+        self.security_mode = None
+        self.security_policy = None
+        self.certificate_path = None
+        self.private_key_path = None
+
+    def load_security_settings(self, uri):
+        self.security_mode = None
+        self.security_policy = None
+        self.certificate_path = None
+        self.private_key_path = None
+
+        mysettings = self.settings.value("security_settings", None)
+        if mysettings is None:
+            return
+        if uri in mysettings:
+            mode, policy, cert, key = mysettings[uri]
+            self.security_mode = mode
+            self.security_policy = policy
+            self.certificate_path = cert
+            self.private_key_path = key
+
+    def save_security_settings(self, uri):
+        mysettings = self.settings.value("security_settings", None)
+        if mysettings is None:
+            mysettings = {}
+        mysettings[uri] = [self.security_mode,
+                           self.security_policy,
+                           self.certificate_path,
+                           self.private_key_path]
+        self.settings.setValue("security_settings", mysettings)
 
     def get_node(self, nodeid):
         return self.client.get_node(nodeid)
-
+    
     def connect(self, uri):
         self.disconnect()
-        print("Connecting to ", uri)
+        logger.info("Connecting to %s with parameters %s, %s, %s, %s", uri, self.security_mode, self.security_policy, self.certificate_path, self.private_key_path)
         self.client = Client(uri)
+        if self.security_mode is not None and self.security_policy is not None:
+            self.client.set_security(
+                getattr(crypto.security_policies, 'SecurityPolicy' + self.security_policy),
+                self.certificate_path,
+                self.private_key_path,
+                mode=getattr(ua.MessageSecurityMode, self.security_mode)
+            )
         self.client.connect()
         self._connected = True
+        self.save_security_settings(uri)
 
     def disconnect(self):
         if self._connected:
@@ -34,7 +80,6 @@ class UaClient(object):
             self._subs_dc = {}
             self._subs_ev = {}
             self._connected = False
-            self._subscription = None
             self.client.disconnect()
             self.client = None
 
@@ -65,7 +110,8 @@ class UaClient(object):
         attrs = node.get_attributes([ua.AttributeIds.DisplayName, ua.AttributeIds.BrowseName, ua.AttributeIds.NodeId])
         return node, [attr.Value.Value.to_string() for attr in attrs]
 
-    def get_children(self, node):
+    @staticmethod
+    def get_children(node):
         descs = node.get_children_descriptions()
         descs.sort(key=lambda x: x.BrowseName)
         return descs

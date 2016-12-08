@@ -245,6 +245,9 @@ class Window(QMainWindow):
         self.datachange_ui = DataChangeUI(self, self.uaclient)
         self.event_ui = EventUI(self, self.uaclient)
 
+        self.ui.addrComboBox.currentTextChanged.connect(self._uri_changed)
+        self._uri_changed(self.ui.addrComboBox.currentText())  # force update for current value at startup
+
         self.ui.treeView.activated.connect(self.show_refs)
         self.ui.treeView.clicked.connect(self.show_refs)
         self.ui.actionCopyPath.triggered.connect(self.tree_ui.copy_path)
@@ -269,8 +272,23 @@ class Window(QMainWindow):
         self.ui.actionConnect.triggered.connect(self.connect)
         self.ui.actionDisconnect.triggered.connect(self.disconnect)
 
-        self.connection_dialog = ConnectionDialog(self)
-        self.ui.connectOptionButton.clicked.connect(self.connection_dialog.show)
+        self.ui.connectOptionButton.clicked.connect(self.show_connection_dialog)
+
+    def _uri_changed(self, uri):
+        self.uaclient.load_security_settings(uri)
+
+    def show_connection_dialog(self):
+        dia = ConnectionDialog(self, self.ui.addrComboBox.currentText())
+        dia.security_mode = self.uaclient.security_mode
+        dia.security_policy = self.uaclient.security_policy
+        dia.certificate_path = self.uaclient.certificate_path
+        dia.private_key_path = self.uaclient.private_key_path
+        ret = dia.exec_()
+        if ret:
+            self.uaclient.security_mode = dia.security_mode
+            self.uaclient.security_policy = dia.security_policy
+            self.uaclient.certificate_path = dia.certificate_path
+            self.uaclient.private_key_path = dia.private_key_path
 
     @trycatchslot
     def show_refs(self, idx):
@@ -299,6 +317,7 @@ class Window(QMainWindow):
     def get_uaclient(self):
         return self.uaclient
 
+    @trycatchslot
     def connect(self):
         uri = self.ui.addrComboBox.currentText()
         try:
@@ -339,7 +358,6 @@ class Window(QMainWindow):
         self.settings.setValue("main_window_height", self.size().height())
         self.settings.setValue("main_window_state", self.saveState())
         self.settings.setValue("address_list", self._address_list)
-        self.connection_dialog.save_state()
         self.disconnect()
         event.accept()
 
