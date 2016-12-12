@@ -6,6 +6,7 @@ from opcua import ua
 from opcua import Client
 from opcua import Node
 from opcua import crypto
+from opcua.tools import endpoint_to_strings
 
 
 logger = logging.getLogger(__name__)
@@ -29,6 +30,18 @@ class UaClient(object):
         self.security_policy = None
         self.certificate_path = None
         self.private_key_path = None
+
+    def get_endpoints(self, uri):
+        client = Client(uri, timeout=2)
+        client.connect_and_get_server_endpoints()
+        edps = client.connect_and_get_server_endpoints()
+        for i, ep in enumerate(edps, start=1):
+            logger.info('Endpoint %s:', i)
+            for (n, v) in endpoint_to_strings(ep):
+                logger.info('  %s: %s', n, v)
+            logger.info('')
+        return 
+
 
     def load_security_settings(self, uri):
         self.security_mode = None

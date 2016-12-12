@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QDialog, QFileDialog
 
 from uaclient.connection_ui import Ui_ConnectionDialog
+from uawidgets.utils import trycatchslot
 
 
 class ConnectionDialog(QDialog):
@@ -11,6 +12,7 @@ class ConnectionDialog(QDialog):
 
         self.uaclient = parent.uaclient
         self.uri = uri
+        self.parent = parent
         
         self.ui.modeComboBox.addItem("None")
         self.ui.modeComboBox.addItem("Sign")
@@ -23,6 +25,12 @@ class ConnectionDialog(QDialog):
         self.ui.closeButton.clicked.connect(self.accept)
         self.ui.certificateButton.clicked.connect(self.get_certificate)
         self.ui.privateKeyButton.clicked.connect(self.get_private_key)
+        self.ui.queryButton.clicked.connect(self.query)
+
+    @trycatchslot
+    def query(self):
+        self.parent.uaclient.get_endpoints(self.uri)
+        # FIXME: finish
 
     @property
     def security_mode(self):
