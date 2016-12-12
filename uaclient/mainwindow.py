@@ -11,6 +11,7 @@ from PyQt5.QtGui import QStandardItemModel, QStandardItem, QIcon
 from PyQt5.QtWidgets import QMainWindow, QWidget, QApplication, QAbstractItemView, QMenu, QAction
 
 from opcua import ua
+from opcua import Node
 
 from uaclient.uaclient import UaClient
 from uaclient.mainwindow_ui import Ui_MainWindow
@@ -20,6 +21,7 @@ from uawidgets.attrs_widget import AttrsWidget
 from uawidgets.tree_widget import TreeWidget
 from uawidgets.refs_widget import RefsWidget
 from uawidgets.utils import trycatchslot
+from uawidgets.logger import QtHandler
 
 
 logger = logging.getLogger(__name__)
@@ -155,7 +157,7 @@ class DataChangeUI(object):
 
     @trycatchslot
     def _subscribe(self, node=None):
-        if node is None:
+        if not isinstance(node, Node):
             node = self.window.get_current_node()
             if node is None:
                 return
@@ -365,6 +367,12 @@ class Window(QMainWindow):
 def main():
     app = QApplication(sys.argv)
     client = Window()
+    handler = QtHandler(client.ui.logTextEdit)
+    logging.getLogger().addHandler(handler)
+    logging.getLogger("uaclient").setLevel(logging.INFO)
+    logging.getLogger("uawidgets").setLevel(logging.INFO)
+    #logging.getLogger("opcua").setLevel(logging.INFO)  # to enable logging of ua server
+   
     client.show()
     sys.exit(app.exec_())
 

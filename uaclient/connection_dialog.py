@@ -26,7 +26,10 @@ class ConnectionDialog(QDialog):
 
     @property
     def security_mode(self):
-        return self.ui.modeComboBox.currentText()
+        text = self.ui.modeComboBox.currentText()
+        if text == "None":
+            return None
+        return text
 
     @security_mode.setter
     def security_mode(self, value):
@@ -34,7 +37,10 @@ class ConnectionDialog(QDialog):
 
     @property
     def security_policy(self):
-        return self.ui.policyComboBox.currentText()
+        text = self.ui.policyComboBox.currentText()
+        if text == "None":
+            return None
+        return text
 
     @security_policy.setter
     def security_policy(self, value):
