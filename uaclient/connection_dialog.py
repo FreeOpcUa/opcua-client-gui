@@ -29,8 +29,20 @@ class ConnectionDialog(QDialog):
 
     @trycatchslot
     def query(self):
-        self.parent.uaclient.get_endpoints(self.uri)
-        # FIXME: finish
+        self.ui.modeComboBox.clear()
+        self.ui.policyComboBox.clear()
+        endpoints = self.parent.uaclient.get_endpoints(self.uri)
+        modes = []
+        policies = []
+        for edp in endpoints:
+            mode = edp.SecurityMode.name
+            if mode not in modes:
+                self.ui.modeComboBox.addItem(mode)
+                modes.append(mode)
+            policy = edp.SecurityPolicyUri.split("#")[1]
+            if policy not in policies:
+                self.ui.policyComboBox.addItem(policy)
+                policies.append(policy)
 
     @property
     def security_mode(self):

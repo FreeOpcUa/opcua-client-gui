@@ -40,8 +40,7 @@ class UaClient(object):
             for (n, v) in endpoint_to_strings(ep):
                 logger.info('  %s: %s', n, v)
             logger.info('')
-        return 
-
+        return edps
 
     def load_security_settings(self, uri):
         self.security_mode = None
