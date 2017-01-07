@@ -38,9 +38,9 @@ TODO (listed after priority):
   
 ### Windows:  
 
-1. Install winpython https://winpython.github.io/  
-3. Use pip to install freeopcua-client: `pip install freeopcua-client`  
-4. Run via the script pip created: `YOUR_INSTALL_PATH\Python\Python35\Scripts\opcua-modeler.exe`  
+1. Install winpython https://winpython.github.io/ , install the version including pyqt5!
+3. Use pip to install opcua-client: `pip install opcua-client`  
+4. Run via the script pip created: `YOUR_INSTALL_PATH\Python\Python35\Scripts\opcua-client.exe`  
 
-To update to the latest release run: `pip install freeopcua-client --upgrade`
+To update to the latest release run: `pip install opcua-client --upgrade`
 
