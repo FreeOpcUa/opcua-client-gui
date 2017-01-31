@@ -14,7 +14,7 @@ What works:
 * browsing with icons per node types
 * showing attributes and references
 * subscribing to variable
-* make available on pip: sudo pip install freeopcua-client
+* make available on pip: sudo pip install opcua-client
 * remember connections and show connection history
 * subscribing to events
 * write variable node values
@@ -33,8 +33,8 @@ TODO (listed after priority):
 ### Linux:
 
 1. Make sure python and python-pip is installed  
-2. `pip3 install freeopcua-client`  
-4. Run with: `freeopcua-client`  
+2. `pip install opcua-client`  
+4. Run with: `opcua-client`  
   
 ### Windows:  
 
