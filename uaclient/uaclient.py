@@ -31,7 +31,8 @@ class UaClient(object):
         self.certificate_path = None
         self.private_key_path = None
 
-    def get_endpoints(self, uri):
+    @staticmethod
+    def get_endpoints(uri):
         client = Client(uri, timeout=2)
         client.connect_and_get_server_endpoints()
         edps = client.connect_and_get_server_endpoints()
