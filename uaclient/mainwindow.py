@@ -354,6 +354,7 @@ class Window(QMainWindow):
             self.event_ui.clear()
 
     def closeEvent(self, event):
+        self.tree_ui.save_state()
         self.attrs_ui.save_state()
         self.refs_ui.save_state()
         self.settings.setValue("main_window_width", self.size().width())
