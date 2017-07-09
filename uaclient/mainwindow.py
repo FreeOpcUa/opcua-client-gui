@@ -13,9 +13,9 @@ from PyQt5.QtWidgets import QMainWindow, QWidget, QApplication, QAbstractItemVie
 from opcua import ua
 from opcua import Node
 
-from uaclient.uaclient import UaClient
-from uaclient.mainwindow_ui import Ui_MainWindow
-from uaclient.connection_dialog import ConnectionDialog
+from uaclient import UaClient
+from mainwindow_ui import Ui_MainWindow
+from connection_dialog import ConnectionDialog
 from uawidgets import resources
 from uawidgets.attrs_widget import AttrsWidget
 from uawidgets.tree_widget import TreeWidget
