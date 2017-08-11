@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QDialog, QFileDialog
 
-from uaclient.connection_ui import Ui_ConnectionDialog
+from connection_ui import Ui_ConnectionDialog
 from uawidgets.utils import trycatchslot
 
 
