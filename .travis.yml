@@ -7,17 +7,16 @@ virtualenv:
   system_site_packages: true
 env:
   - DISPLAY=:99.0
-  - PATH=/usr/bin:$PATH
 before_install:
   - sh -e /etc/init.d/xvfb start
 install:
   - sudo apt-get update
   - sudo apt-get -y install python3-pyqt5  
-  - sudo apt-get -y install python3-lxml  
   - sudo apt-get -y install pyqt5-dev-tools  
   - pip install python-dateutil
   - pip install pytz
   - pip install cryptography
+  - pip install lxml
   - git clone https://github.com/FreeOpcUa/python-opcua.git 
   - git clone https://github.com/FreeOpcUa/opcua-widgets.git 
 # command to run tests
