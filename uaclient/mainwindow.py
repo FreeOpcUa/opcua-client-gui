@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
 import sys
+
 from datetime import datetime
 import inspect
 from enum import Enum
@@ -16,6 +17,8 @@ from opcua import Node
 from uaclient.uaclient import UaClient
 from uaclient.mainwindow_ui import Ui_MainWindow
 from uaclient.connection_dialog import ConnectionDialog
+from uaclient.graphwidget import GraphUI
+
 from uawidgets import resources
 from uawidgets.attrs_widget import AttrsWidget
 from uawidgets.tree_widget import TreeWidget
@@ -205,6 +208,7 @@ class DataChangeUI(object):
             i += 1
 
 
+
 class Window(QMainWindow):
 
     def __init__(self):
@@ -220,6 +224,7 @@ class Window(QMainWindow):
         # tabify some docks
         self.tabifyDockWidget(self.ui.evDockWidget, self.ui.subDockWidget)
         self.tabifyDockWidget(self.ui.subDockWidget, self.ui.refDockWidget)
+        self.tabifyDockWidget(self.ui.refDockWidget, self.ui.graphDockWidget)
 
         # we only show statusbar in case of errors
         self.ui.statusBar.hide()
@@ -246,6 +251,7 @@ class Window(QMainWindow):
         self.attrs_ui.error.connect(self.show_error)
         self.datachange_ui = DataChangeUI(self, self.uaclient)
         self.event_ui = EventUI(self, self.uaclient)
+        self.graph_ui = GraphUI(self, self.uaclient)
 
         self.ui.addrComboBox.currentTextChanged.connect(self._uri_changed)
         self._uri_changed(self.ui.addrComboBox.currentText())  # force update for current value at startup

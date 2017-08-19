@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>922</width>
-    <height>692</height>
+    <height>879</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -60,7 +60,7 @@
      <x>0</x>
      <y>0</y>
      <width>922</width>
-     <height>26</height>
+     <height>30</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuOPC_UA_Client">
@@ -89,7 +89,7 @@
    <property name="minimumSize">
     <size>
      <width>400</width>
-     <height>156</height>
+     <height>170</height>
     </size>
    </property>
    <property name="windowTitle">
@@ -344,6 +344,73 @@
     </layout>
    </widget>
   </widget>
+  <widget class="QDockWidget" name="graphDockWidget">
+   <property name="windowTitle">
+    <string>&amp;Graph</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_6">
+    <layout class="QGridLayout" name="gridLayout_7">
+     <item row="0" column="0">
+      <layout class="QVBoxLayout" name="graphLayout">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QLabel" name="labelNumberOfPoints">
+           <property name="text">
+            <string>Number of Points</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="spinBoxNumberOfPoints">
+           <property name="minimum">
+            <number>10</number>
+           </property>
+           <property name="maximum">
+            <number>100</number>
+           </property>
+           <property name="value">
+            <number>30</number>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="labelIntervall">
+           <property name="text">
+            <string>Intervall [s]</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="spinBoxIntervall">
+           <property name="minimum">
+            <number>1</number>
+           </property>
+           <property name="maximum">
+            <number>3600</number>
+           </property>
+           <property name="value">
+            <number>5</number>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="buttonApply">
+           <property name="text">
+            <string>Apply</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </widget>
+  </widget>
   <action name="actionConnect">
    <property name="text">
     <string>&amp;Connect</string>
@@ -403,6 +470,28 @@
    </property>
    <property name="toolTip">
     <string>Copy NodeId to clipboard</string>
+   </property>
+  </action>
+  <action name="actionAddToGraph">
+   <property name="text">
+    <string>Add to &amp;Graph</string>
+   </property>
+   <property name="toolTip">
+    <string>Add this node to the graph</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+G</string>
+   </property>
+  </action>
+  <action name="actionRemoveFromGraph">
+   <property name="text">
+    <string>Remove from Graph</string>
+   </property>
+   <property name="toolTip">
+    <string>Remove this node from the graph</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+G</string>
    </property>
   </action>
  </widget>
