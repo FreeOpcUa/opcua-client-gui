@@ -40,20 +40,17 @@ class TestClient(unittest.TestCase):
 
     def test_select_objects(self):
         objects = self.server.nodes.objects
-        self.client.tree_ui.set_current_node("Objects")
+        self.client.tree_ui.expand_to_node(objects)
         self.assertEqual(objects, self.client.tree_ui.get_current_node())
         self.assertGreater(self.client.attrs_ui.model.rowCount(), 6)
-        print("REF COUNT", self.client.refs_ui.model.rowCount())
         self.assertGreater(self.client.refs_ui.model.rowCount(), 1)
 
         data = self.get_attr_value("NodeId")
         self.assertEqual(data, objects.nodeid)
 
     def test_select_server_node(self):
-        self.client.tree_ui.set_current_node("Objects")
-        self.client.tree_ui.expand_current_node()  # must be expanded to load children
         server_node = self.server.nodes.server
-        self.client.tree_ui.set_current_node("Server")
+        self.client.tree_ui.expand_to_node(server_node)
         self.assertEqual(server_node, self.client.tree_ui.get_current_node())
         self.assertGreater(self.client.attrs_ui.model.rowCount(), 6)
         self.assertGreater(self.client.refs_ui.model.rowCount(), 10)
