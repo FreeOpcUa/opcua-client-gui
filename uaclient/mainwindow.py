@@ -336,6 +336,7 @@ class Window(QMainWindow):
 
         self._update_address_list(uri)
         self.tree_ui.set_root_node(self.uaclient.client.get_root_node())
+        self.load_current_node()
 
     def _update_address_list(self, uri):
         if uri == self._address_list[0]:
@@ -353,11 +354,13 @@ class Window(QMainWindow):
             self.show_error(ex)
             raise
         finally:
+            self.save_current_node()
             self.tree_ui.clear()
             self.refs_ui.clear()
             self.attrs_ui.clear()
             self.datachange_ui.clear()
             self.event_ui.clear()
+
 
     def closeEvent(self, event):
         self.tree_ui.save_state()
@@ -369,6 +372,26 @@ class Window(QMainWindow):
         self.settings.setValue("address_list", self._address_list)
         self.disconnect()
         event.accept()
+
+    def save_current_node(self):
+        current_node = self.tree_ui.get_current_node()
+        if current_node:
+            mysettings = self.settings.value("current_node", None)
+            if mysettings is None:
+                mysettings = {}
+            uri = self.ui.addrComboBox.currentText()
+            mysettings[uri] = current_node.nodeid.to_string()
+            self.settings.setValue("current_node", mysettings)
+
+    def load_current_node(self):
+        mysettings = self.settings.value("current_node", None)
+        if mysettings is None:
+            return
+        uri = self.ui.addrComboBox.currentText()
+        if uri in mysettings:
+            nodeid = ua.NodeId.from_string(mysettings[uri])
+            node = self.uaclient.client.get_node(nodeid)
+            self.tree_ui.expand_to_node(node)
 
 
 def main():
