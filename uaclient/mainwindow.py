@@ -93,7 +93,7 @@ class EventUI(object):
             if node is None:
                 return
         if node in self._subscribed_nodes:
-            logger.info("allready subscribed to event for node: %s", node)
+            logger.info("already subscribed to event for node: %s", node)
             return
         logger.info("Subscribing to events for %s", node)
         self.window.ui.evDockWidget.raise_()
@@ -206,7 +206,6 @@ class DataChangeUI(object):
                 it_ts = self.model.item(i, 2)
                 it_ts.setText(timestamp)
             i += 1
-
 
 
 class Window(QMainWindow):

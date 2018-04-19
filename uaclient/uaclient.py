@@ -31,6 +31,14 @@ class UaClient(object):
         self.certificate_path = None
         self.private_key_path = None
 
+    def _reset(self):
+        self.client = None
+        self._connected = False
+        self._datachange_sub = None
+        self._event_sub = None
+        self._subs_dc = {}
+        self._subs_ev = {}
+
     @staticmethod
     def get_endpoints(uri):
         client = Client(uri, timeout=2)
@@ -90,11 +98,11 @@ class UaClient(object):
     def disconnect(self):
         if self._connected:
             print("Disconnecting from server")
-            self._subs_dc = {}
-            self._subs_ev = {}
             self._connected = False
-            self.client.disconnect()
-            self.client = None
+            try:
+                self.client.disconnect()
+            finally:
+                self._reset()
 
     def subscribe_datachange(self, node, handler):
         if not self._datachange_sub:
