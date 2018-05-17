@@ -7,7 +7,7 @@ import inspect
 from enum import Enum
 import logging
 
-from PyQt5.QtCore import pyqtSignal, QTimer, Qt, QObject, QSettings, QModelIndex, QMimeData, QCoreApplication
+from PyQt5.QtCore import pyqtSignal, QTimer, Qt, QObject, QSettings, QItemSelection, QMimeData, QCoreApplication
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QIcon
 from PyQt5.QtWidgets import QMainWindow, QWidget, QApplication, QAbstractItemView, QMenu, QAction
 
@@ -255,16 +255,14 @@ class Window(QMainWindow):
         self.ui.addrComboBox.currentTextChanged.connect(self._uri_changed)
         self._uri_changed(self.ui.addrComboBox.currentText())  # force update for current value at startup
 
-        self.ui.treeView.activated.connect(self.show_refs)
-        self.ui.treeView.clicked.connect(self.show_refs)
+        self.ui.treeView.selectionModel().selectionChanged.connect(self.show_refs)
         self.ui.actionCopyPath.triggered.connect(self.tree_ui.copy_path)
         self.ui.actionCopyNodeId.triggered.connect(self.tree_ui.copy_nodeid)
         # add items to context menu
         self.ui.treeView.addAction(self.ui.actionCopyPath)
         self.ui.treeView.addAction(self.ui.actionCopyNodeId)
 
-        self.ui.treeView.activated.connect(self.show_attrs)
-        self.ui.treeView.clicked.connect(self.show_attrs)
+        self.ui.treeView.selectionModel().selectionChanged.connect(self.show_attrs)
         self.ui.attrRefreshButton.clicked.connect(self.show_attrs)
 
         self.resize(int(self.settings.value("main_window_width", 800)), int(self.settings.value("main_window_height", 600)))
@@ -298,16 +296,22 @@ class Window(QMainWindow):
             self.uaclient.private_key_path = dia.private_key_path
 
     @trycatchslot
-    def show_refs(self, idx):
-        node = self.get_current_node(idx)
+    def show_refs(self, selection):
+        if isinstance(selection, QItemSelection):
+            if not selection.indexes(): # no selection
+                return
+
+        node = self.get_current_node()
         if node:
             self.refs_ui.show_refs(node)
     
     @trycatchslot
-    def show_attrs(self, idx):
-        if not isinstance(idx, QModelIndex):
-            idx = None
-        node = self.get_current_node(idx)
+    def show_attrs(self, selection):
+        if isinstance(selection, QItemSelection):
+            if not selection.indexes(): # no selection
+                return
+
+        node = self.get_current_node()
         if node:
             self.attrs_ui.show_attrs(node)
 
@@ -335,6 +339,7 @@ class Window(QMainWindow):
 
         self._update_address_list(uri)
         self.tree_ui.set_root_node(self.uaclient.client.get_root_node())
+        self.ui.treeView.setFocus()
         self.load_current_node()
 
     def _update_address_list(self, uri):
