@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'uaclient/connection_ui.ui'
 #
-# Created by: PyQt5 UI code generator 5.7
+# Created by: PyQt5 UI code generator 5.10.1
 #
 # WARNING! All changes made in this file will be lost!
 

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'uaclient/mainwindow_ui.ui'
 #
-# Created by: PyQt5 UI code generator 5.7
+# Created by: PyQt5 UI code generator 5.10.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -43,7 +43,7 @@ class Ui_MainWindow(object):
         self.gridLayout_2.addWidget(self.splitter, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralWidget)
         self.menuBar = QtWidgets.QMenuBar(MainWindow)
-        self.menuBar.setGeometry(QtCore.QRect(0, 0, 922, 30))
+        self.menuBar.setGeometry(QtCore.QRect(0, 0, 922, 25))
         self.menuBar.setObjectName("menuBar")
         self.menuOPC_UA_Client = QtWidgets.QMenu(self.menuBar)
         self.menuOPC_UA_Client.setObjectName("menuOPC_UA_Client")
@@ -225,11 +225,9 @@ class Ui_MainWindow(object):
         self.gridLayout_7.setSpacing(6)
         self.gridLayout_7.setObjectName("gridLayout_7")
         self.graphLayout = QtWidgets.QVBoxLayout()
-        self.graphLayout.setContentsMargins(11, 11, 11, 11)
         self.graphLayout.setSpacing(6)
         self.graphLayout.setObjectName("graphLayout")
         self.horizontalLayout = QtWidgets.QHBoxLayout()
-        self.horizontalLayout.setContentsMargins(11, 11, 11, 11)
         self.horizontalLayout.setSpacing(6)
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.labelNumberOfPoints = QtWidgets.QLabel(self.dockWidgetContents_6)
@@ -277,6 +275,8 @@ class Ui_MainWindow(object):
         self.actionAddToGraph.setObjectName("actionAddToGraph")
         self.actionRemoveFromGraph = QtWidgets.QAction(MainWindow)
         self.actionRemoveFromGraph.setObjectName("actionRemoveFromGraph")
+        self.actionCall = QtWidgets.QAction(MainWindow)
+        self.actionCall.setObjectName("actionCall")
         self.menuOPC_UA_Client.addAction(self.actionConnect)
         self.menuOPC_UA_Client.addAction(self.actionDisconnect)
         self.menuOPC_UA_Client.addAction(self.actionCopyPath)
@@ -327,4 +327,6 @@ class Ui_MainWindow(object):
         self.actionRemoveFromGraph.setText(_translate("MainWindow", "Remove from Graph"))
         self.actionRemoveFromGraph.setToolTip(_translate("MainWindow", "Remove this node from the graph"))
         self.actionRemoveFromGraph.setShortcut(_translate("MainWindow", "Ctrl+Shift+G"))
+        self.actionCall.setText(_translate("MainWindow", "Call"))
+        self.actionCall.setToolTip(_translate("MainWindow", "Call Ua Method"))
 

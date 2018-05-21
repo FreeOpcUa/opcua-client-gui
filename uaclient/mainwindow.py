@@ -25,6 +25,7 @@ from uawidgets.tree_widget import TreeWidget
 from uawidgets.refs_widget import RefsWidget
 from uawidgets.utils import trycatchslot
 from uawidgets.logger import QtHandler
+from uawidgets.call_method_dialog import CallMethodDialog
 
 
 logger = logging.getLogger(__name__)
@@ -62,8 +63,8 @@ class EventUI(object):
         self.window.ui.actionSubscribeEvent.triggered.connect(self._subscribe)
         self.window.ui.actionUnsubscribeEvents.triggered.connect(self._unsubscribe)
         # context menu
-        self.window.ui.treeView.addAction(self.window.ui.actionSubscribeEvent)
-        self.window.ui.treeView.addAction(self.window.ui.actionUnsubscribeEvents)
+        self.window.addAction(self.window.ui.actionSubscribeEvent)
+        self.window.addAction(self.window.ui.actionUnsubscribeEvents)
         self._handler.event_fired.connect(self._update_event_model, type=Qt.QueuedConnection)
 
         # accept drops
@@ -133,8 +134,8 @@ class DataChangeUI(object):
         self.window.ui.actionUnsubscribeDataChange.triggered.connect(self._unsubscribe)
 
         # populate contextual menu
-        self.window.ui.treeView.addAction(self.window.ui.actionSubscribeDataChange)
-        self.window.ui.treeView.addAction(self.window.ui.actionUnsubscribeDataChange)
+        self.window.addAction(self.window.ui.actionSubscribeDataChange)
+        self.window.addAction(self.window.ui.actionUnsubscribeDataChange)
 
         # handle subscriptions
         self._subhandler.data_change_fired.connect(self._update_subscription_model, type=Qt.QueuedConnection)
@@ -244,6 +245,9 @@ class Window(QMainWindow):
 
         self.tree_ui = TreeWidget(self.ui.treeView)
         self.tree_ui.error.connect(self.show_error)
+        self.setup_context_menu_tree()
+        self.ui.treeView.selectionModel().currentChanged.connect(self._update_actions_state)
+
         self.refs_ui = RefsWidget(self.ui.refView)
         self.refs_ui.error.connect(self.show_error)
         self.attrs_ui = AttrsWidget(self.ui.attrView)
@@ -258,9 +262,7 @@ class Window(QMainWindow):
         self.ui.treeView.selectionModel().selectionChanged.connect(self.show_refs)
         self.ui.actionCopyPath.triggered.connect(self.tree_ui.copy_path)
         self.ui.actionCopyNodeId.triggered.connect(self.tree_ui.copy_nodeid)
-        # add items to context menu
-        self.ui.treeView.addAction(self.ui.actionCopyPath)
-        self.ui.treeView.addAction(self.ui.actionCopyNodeId)
+        self.ui.actionCall.triggered.connect(self.call_method)
 
         self.ui.treeView.selectionModel().selectionChanged.connect(self.show_attrs)
         self.ui.attrRefreshButton.clicked.connect(self.show_attrs)
@@ -397,6 +399,37 @@ class Window(QMainWindow):
             node = self.uaclient.client.get_node(nodeid)
             self.tree_ui.expand_to_node(node)
 
+    def setup_context_menu_tree(self):
+        self.ui.treeView.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.ui.treeView.customContextMenuRequested.connect(self._show_context_menu_tree)
+        self._contextMenu = QMenu()
+        self.addAction(self.ui.actionCopyPath)
+        self.addAction(self.ui.actionCopyNodeId)
+        self._contextMenu.addSeparator()
+        self._contextMenu.addAction(self.ui.actionCall)
+        self._contextMenu.addSeparator()
+
+    def addAction(self, action):
+        self._contextMenu.addAction(action)
+
+    @trycatchslot
+    def _update_actions_state(self, current, previous):
+        node = self.get_current_node(current)
+        self.ui.actionCall.setEnabled(False)
+        if node:
+            if node.get_node_class() == ua.NodeClass.Method:
+                self.ui.actionCall.setEnabled(True)
+
+    def _show_context_menu_tree(self, position):
+        node = self.tree_ui.get_current_node()
+        if node:
+            self._contextMenu.exec_(self.ui.treeView.viewport().mapToGlobal(position))
+
+    def call_method(self):
+        node = self.get_current_node()
+        dia = CallMethodDialog(self, self.uaclient.client, node)
+        dia.show()
+
 
 def main():
     app = QApplication(sys.argv)
@@ -405,7 +438,7 @@ def main():
     logging.getLogger().addHandler(handler)
     logging.getLogger("uaclient").setLevel(logging.INFO)
     logging.getLogger("uawidgets").setLevel(logging.INFO)
-    #logging.getLogger("opcua").setLevel(logging.INFO)  # to enable logging of ua server
+    #logging.getLogger("opcua").setLevel(logging.INFO)  # to enable logging of ua client library
    
     client.show()
     sys.exit(app.exec_())

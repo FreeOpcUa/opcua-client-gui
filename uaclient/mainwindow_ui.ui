@@ -60,7 +60,7 @@
      <x>0</x>
      <y>0</y>
      <width>922</width>
-     <height>30</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuOPC_UA_Client">
@@ -492,6 +492,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+G</string>
+   </property>
+  </action>
+  <action name="actionCall">
+   <property name="text">
+    <string>Call</string>
+   </property>
+   <property name="toolTip">
+    <string>Call Ua Method</string>
    </property>
   </action>
  </widget>
