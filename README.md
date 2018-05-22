@@ -14,12 +14,15 @@ What works:
 * browsing with icons per node types
 * showing attributes and references
 * subscribing to variable
-* make available on pip: sudo pip install opcua-client
+* available on pip: sudo pip install opcua-client
 * remember connections and show connection history
 * subscribing to events
 * write variable node values
 * gui for certificates
 * gui for encryption 
+* call methods
+* plot method values
+* remember last browsed path and restore state
 
 TODO (listed after priority):
 
