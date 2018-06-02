@@ -4,7 +4,7 @@ Simple OPC-UA GUI client.
 [![Build Status](https://travis-ci.org/FreeOpcUa/opcua-client-gui.svg?branch=master)](https://travis-ci.org/FreeOpcUa/opcua-client-gui)
 [![Build Status](https://travis-ci.org/FreeOpcUa/opcua-widgets.svg?branch=master)](https://travis-ci.org/FreeOpcUa/opcua-widgets)
 
-Written using freeopcua python api and pyqt. Basic functionnalities are implemented including subscribing for data changes and events, write variable values listing attributes and references.
+Written using freeopcua python api and pyqt. Most needed functionnalities are implemented including subscribing for data changes and events, write variable values listing attributes and references, and call methods. PR are welcome for any whished improvments
 
 It has also a contextual menu with a few usefull function like putting the mode id in clipboard or the entire browse path which can be used directly in you program: client.nodes.root.get_child(['0:Objects', '2:MyNode'])
 
@@ -29,6 +29,8 @@ TODO (listed after priority):
 
 * detect lost connection and automatically reconnect 
 * gui for loging with certificate or user/password (can currently be done by writting them in uri)
+* Maybe read history
+* Something else?
 
 # How to Install  
 
