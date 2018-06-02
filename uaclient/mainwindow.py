@@ -65,6 +65,7 @@ class EventUI(object):
         # context menu
         self.window.addAction(self.window.ui.actionSubscribeEvent)
         self.window.addAction(self.window.ui.actionUnsubscribeEvents)
+        self.window.addAction(self.window.ui.actionAddToGraph)
         self._handler.event_fired.connect(self._update_event_model, type=Qt.QueuedConnection)
 
         # accept drops
