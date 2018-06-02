@@ -6,6 +6,9 @@ Simple OPC-UA GUI client.
 
 Written using freeopcua python api and pyqt. Basic functionnalities are implemented including subscribing for data changes and events, write variable values listing attributes and references.
 
+It has also a contextual menu with a few usefull function like putting the mode id in clipboard or the entire browse path which can be used directly in you program: client.nodes.root.get_child(['0:Objects', '2:MyNode'])
+![Screenshot](/menu.png?raw=true "Contextual menu")
+
 
 ![Screenshot](/screenshot.png?raw=true "Screenshot")
 
