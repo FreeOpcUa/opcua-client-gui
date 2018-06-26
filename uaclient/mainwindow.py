@@ -236,11 +236,12 @@ class Window(QMainWindow):
         self.settings = QSettings()
 
         self._address_list = self.settings.value("address_list", ["opc.tcp://localhost:4840", "opc.tcp://localhost:53530/OPCUA/SimulationServer/"])
+        print("ADR", self._address_list)
         self._address_list_max_count = int(self.settings.value("address_list_max_count", 10))
 
         # init widgets
         for addr in self._address_list:
-            self.ui.addrComboBox.insertItem(-1, addr)
+            self.ui.addrComboBox.insertItem(100, addr)
 
         self.uaclient = UaClient()
 
