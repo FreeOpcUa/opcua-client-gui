@@ -1,0 +1,74 @@
+name: opcua-client
+version: v0.1
+summary: OPCUA Client GUI application
+description: |
+    OPCUA Client GUI application using Python3/PyQt
+
+confinement: devmode
+base: core18
+
+parts:
+  desktop-qt5:
+    source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
+    source-subdir: qt
+    plugin: make
+    make-parameters: ["FLAVOR=qt5"]
+    build-packages:
+      - build-essential
+      - qtbase5-dev
+      - dpkg-dev
+    stage-packages:
+      - libxkbcommon0
+      - ttf-ubuntu-font-family
+      - dmz-cursor-theme
+      - light-themes
+      - adwaita-icon-theme
+      - gnome-themes-standard
+      - shared-mime-info
+      - libqt5gui5
+      - libgdk-pixbuf2.0-0
+      - libqt5svg5 # for loading icon themes which are svg
+      - try: [appmenu-qt5] # not available on core18
+      - locales-all
+      - xdg-user-dirs
+      - fcitx-frontend-qt5
+
+  opcua-client:
+    plugin: python
+    python-version: python3
+    source: https://github.com/FreeOpcUa/opcua-client-gui.git
+    stage-packages:
+      - qt5-gtk-platformtheme
+      - python3-pyqt5
+      - qtwayland5 
+      - python3-pyqtgraph
+    python-packages:
+      - cryptography
+    after: [desktop-qt5]
+
+plugs: # plugs for theming, font settings, cursor and to use gtk3 file chooser
+  gtk-3-themes:
+    interface: content
+    target: $SNAP/data-dir/themes
+    default-provider: gtk-common-themes:gtk-3-themes
+  icon-themes:
+    interface: content
+    target: $SNAP/data-dir/icons
+    default-provider: gtk-common-themes:icon-themes
+  sound-themes:
+    interface: content
+    target: $SNAP/data-dir/sounds
+    default-provider: gtk-common-themes:sounds-themes
+
+apps:
+  shell:
+    environment:
+      DISABLE_WAYLAND: 1  # wayland disaply seems broken
+    command: desktop-launch bash
+  uaclient:
+    environment:
+      DISABLE_WAYLAND: 1
+      # Use GTK3 cursor theme, icon theme and open/save file dialogs.
+      QT_QPA_PLATFORMTHEME: gtk3
+    command: desktop-launch opcua-client
+    plugs: [desktop, desktop-legacy, x11, unity7, wayland, opengl, network]
