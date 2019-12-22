@@ -61,11 +61,7 @@ plugs: # plugs for theming, font settings, cursor and to use gtk3 file chooser
     default-provider: gtk-common-themes:sounds-themes
 
 apps:
-  shell:
-    environment:
-      DISABLE_WAYLAND: 1  # wayland disaply seems broken
-    command: desktop-launch bash
-  uaclient:
+  opcua-client:
     environment:
       DISABLE_WAYLAND: 1
       # Use GTK3 cursor theme, icon theme and open/save file dialogs.
