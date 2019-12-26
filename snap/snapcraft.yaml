@@ -4,7 +4,8 @@ summary: OPCUA Client GUI application
 description: |
     OPCUA Client GUI application using Python3/PyQt
 
-confinement: devmode
+confinement: strict
+grade: stable
 base: core18
 
 parts:
@@ -42,6 +43,7 @@ parts:
       - python3-pyqt5
       - qtwayland5 
       - python3-pyqtgraph
+      - python3-numpy
     python-packages:
       - cryptography
     after: [desktop-qt5]
