@@ -39,7 +39,7 @@ TODO (listed after priority):
 ### Linux:
 
 1. Make sure python and python-pip is installed  
-2. `pip install opcua-client`  
+2. `pip3 install opcua-client`  
 4. Run with: `opcua-client`  
   
 ### Windows:  
