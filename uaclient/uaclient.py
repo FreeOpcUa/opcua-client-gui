@@ -42,7 +42,6 @@ class UaClient(object):
     @staticmethod
     def get_endpoints(uri):
         client = Client(uri, timeout=2)
-        client.connect_and_get_server_endpoints()
         edps = client.connect_and_get_server_endpoints()
         for i, ep in enumerate(edps, start=1):
             logger.info('Endpoint %s:', i)
