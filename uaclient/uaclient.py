@@ -78,7 +78,7 @@ class UaClient(object):
 
     def get_node(self, nodeid):
         return self.client.get_node(nodeid)
-    
+
     def connect(self, uri):
         self.disconnect()
         logger.info("Connecting to %s with parameters %s, %s, %s, %s", uri, self.security_mode, self.security_policy, self.certificate_path, self.private_key_path)
@@ -92,6 +92,8 @@ class UaClient(object):
             )
         self.client.connect()
         self._connected = True
+        self.client.load_enums()
+        self.client.load_type_definitions()
         self.save_security_settings(uri)
 
     def disconnect(self):
