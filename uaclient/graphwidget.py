@@ -1,13 +1,12 @@
 #! /usr/bin/env python3
 
 
-
 import logging
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtWidgets import QLabel
 
-from opcua import ua
-from opcua import Node
+from asyncua import ua
+from asyncua.sync import Node
 
 from uawidgets.utils import trycatchslot
 
@@ -18,7 +17,6 @@ try:
 except ImportError:
     print("pyqtgraph or numpy are not installed, use of graph feature disabled")
     use_graph = False
-
 
 
 if use_graph:
@@ -43,11 +41,11 @@ class GraphUI(object):
         if not use_graph:
             self.window.ui.graphLayout.addWidget(QLabel("pyqtgraph or numpy not installed"))
             return
-        self._node_list = [] # holds the nodes to poll
-        self._channels = [] # holds the actual data
-        self._curves = [] # holds the curve objects
+        self._node_list = []  # holds the nodes to poll
+        self._channels = []  # holds the actual data
+        self._curves = []  # holds the curve objects
         self.pw = pg.PlotWidget(name='Plot1')
-        self.pw.showGrid(x = True, y = True, alpha = 0.3)
+        self.pw.showGrid(x = True, y=True, alpha = 0.3)
         self.legend = self.pw.addLegend()
         self.window.ui.graphLayout.addWidget(self.pw)
 

@@ -3,23 +3,20 @@
 import sys
 
 from datetime import datetime
-import inspect
-from enum import Enum
 import logging
 
-from PyQt5.QtCore import pyqtSignal, QTimer, Qt, QObject, QSettings, QItemSelection, QMimeData, QCoreApplication
+from PyQt5.QtCore import pyqtSignal, QTimer, Qt, QObject, QSettings, QItemSelection, QCoreApplication
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QIcon
-from PyQt5.QtWidgets import QMainWindow, QWidget, QApplication, QAbstractItemView, QMenu, QAction
+from PyQt5.QtWidgets import QMainWindow, QWidget, QApplication, QMenu
 
-from opcua import ua
-from opcua import Node
+from asyncua import ua
+from asyncua.sync import Node
 
 from uaclient.uaclient import UaClient
 from uaclient.mainwindow_ui import Ui_MainWindow
 from uaclient.connection_dialog import ConnectionDialog
 from uaclient.graphwidget import GraphUI
 
-from uawidgets import resources
 from uawidgets.attrs_widget import AttrsWidget
 from uawidgets.tree_widget import TreeWidget
 from uawidgets.refs_widget import RefsWidget
@@ -140,7 +137,7 @@ class DataChangeUI(object):
 
         # handle subscriptions
         self._subhandler.data_change_fired.connect(self._update_subscription_model, type=Qt.QueuedConnection)
-        
+
         # accept drops
         self.model.canDropMimeData = self.canDropMimeData
         self.model.dropMimeData = self.dropMimeData
@@ -308,7 +305,7 @@ class Window(QMainWindow):
         node = self.get_current_node()
         if node:
             self.refs_ui.show_refs(node)
-    
+
     @trycatchslot
     def show_attrs(self, selection):
         if isinstance(selection, QItemSelection):
@@ -342,7 +339,7 @@ class Window(QMainWindow):
             raise
 
         self._update_address_list(uri)
-        self.tree_ui.set_root_node(self.uaclient.client.get_root_node())
+        self.tree_ui.set_root_node(self.uaclient.client.nodes.root)
         self.ui.treeView.setFocus()
         self.load_current_node()
 
@@ -419,7 +416,7 @@ class Window(QMainWindow):
         node = self.get_current_node(current)
         self.ui.actionCall.setEnabled(False)
         if node:
-            if node.get_node_class() == ua.NodeClass.Method:
+            if node.read_node_class() == ua.NodeClass.Method:
                 self.ui.actionCall.setEnabled(True)
 
     def _show_context_menu_tree(self, position):
@@ -441,7 +438,7 @@ def main():
     logging.getLogger("uaclient").setLevel(logging.INFO)
     logging.getLogger("uawidgets").setLevel(logging.INFO)
     #logging.getLogger("opcua").setLevel(logging.INFO)  # to enable logging of ua client library
-   
+
     client.show()
     sys.exit(app.exec_())
 
