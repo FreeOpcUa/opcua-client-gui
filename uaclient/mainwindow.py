@@ -10,13 +10,14 @@ from PyQt5.QtGui import QStandardItemModel, QStandardItem, QIcon
 from PyQt5.QtWidgets import QMainWindow, QWidget, QApplication, QMenu
 
 from asyncua import ua
-from asyncua.sync import Node
+from asyncua.sync import SyncNode
 
 from uaclient.uaclient import UaClient
 from uaclient.mainwindow_ui import Ui_MainWindow
 from uaclient.connection_dialog import ConnectionDialog
 from uaclient.graphwidget import GraphUI
 
+from uawidgets import resources  # must be here for ressources even if not used
 from uawidgets.attrs_widget import AttrsWidget
 from uawidgets.tree_widget import TreeWidget
 from uawidgets.refs_widget import RefsWidget
@@ -159,7 +160,7 @@ class DataChangeUI(object):
 
     @trycatchslot
     def _subscribe(self, node=None):
-        if not isinstance(node, Node):
+        if not isinstance(node, SyncNode):
             node = self.window.get_current_node()
             if node is None:
                 return
@@ -167,7 +168,7 @@ class DataChangeUI(object):
             logger.warning("allready subscribed to node: %s ", node)
             return
         self.model.setHorizontalHeaderLabels(["DisplayName", "Value", "Timestamp"])
-        text = str(node.get_display_name().Text)
+        text = str(node.read_display_name().Text)
         row = [QStandardItem(text), QStandardItem("No Data yet"), QStandardItem("")]
         row[0].setData(node)
         self.model.appendRow(row)

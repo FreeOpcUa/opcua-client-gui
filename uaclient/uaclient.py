@@ -3,7 +3,7 @@ import logging
 from PyQt5.QtCore import QSettings
 
 from asyncua import ua
-from asyncua.sync import Client, Node
+from asyncua.sync import Client, SyncNode
 from asyncua import crypto
 from asyncua.tools import endpoint_to_strings
 
@@ -126,7 +126,7 @@ class UaClient(object):
         self._event_sub.unsubscribe(self._subs_ev[node.nodeid])
 
     def get_node_attrs(self, node):
-        if not isinstance(node, Node):
+        if not isinstance(node, SyncNode):
             node = self.client.get_node(node)
         attrs = node.get_attributes([ua.AttributeIds.DisplayName, ua.AttributeIds.BrowseName, ua.AttributeIds.NodeId])
         return node, [attr.Value.Value.to_string() for attr in attrs]
