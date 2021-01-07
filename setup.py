@@ -8,7 +8,7 @@ setup(name="opcua-client",
       url='https://github.com/FreeOpcUa/opcua-client-gui',
       packages=["uaclient"],
       license="GNU General Public License",
-      install_requires=["asyncua", "opcua-widgets>=0.5.4"],
+      install_requires=["asyncua", "opcua-widgets>=0.5.4", "PyQt5"],
       entry_points={'console_scripts':
                     ['opcua-client = uaclient.mainwindow:main']
                     }
