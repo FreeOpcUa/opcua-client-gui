@@ -91,9 +91,9 @@ class UaClient(object):
             )
         self.client.connect()
         self._connected = True
+        self.client.load_data_type_definitions()
         self.client.load_enums()
         self.client.load_type_definitions()
-        self.client.load_data_type_definitions()
         self.save_security_settings(uri)
 
     def disconnect(self):

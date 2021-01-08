@@ -333,6 +333,7 @@ class Window(QMainWindow):
     @trycatchslot
     def connect(self):
         uri = self.ui.addrComboBox.currentText()
+        uri = uri.strip()
         try:
             self.uaclient.connect(uri)
         except Exception as ex:
