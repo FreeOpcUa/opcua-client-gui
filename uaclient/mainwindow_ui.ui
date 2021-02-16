@@ -60,7 +60,7 @@
      <x>0</x>
      <y>0</y>
      <width>922</width>
-     <height>25</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuOPC_UA_Client">
@@ -76,7 +76,14 @@
     <addaction name="actionSubscribeEvent"/>
     <addaction name="actionUnsubscribeEvents"/>
    </widget>
+   <widget class="QMenu" name="menuSettings">
+    <property name="title">
+     <string>Settings</string>
+    </property>
+    <addaction name="actionDark_Mode"/>
+   </widget>
    <addaction name="menuOPC_UA_Client"/>
+   <addaction name="menuSettings"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QDockWidget" name="attrDockWidget">
@@ -500,6 +507,17 @@
    </property>
    <property name="toolTip">
     <string>Call Ua Method</string>
+   </property>
+  </action>
+  <action name="actionDark_Mode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Dark Mode</string>
+   </property>
+   <property name="statusTip">
+    <string>Enables Dark Mode Theme</string>
    </property>
   </action>
  </widget>

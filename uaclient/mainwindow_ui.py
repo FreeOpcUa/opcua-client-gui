@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'uaclient/mainwindow_ui.ui'
+# Form implementation generated from reading ui file 'mainwindow_ui.ui'
 #
-# Created by: PyQt5 UI code generator 5.10.1
+# Created by: PyQt5 UI code generator 5.12
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -44,10 +44,12 @@ class Ui_MainWindow(object):
         self.gridLayout_2.addWidget(self.splitter, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralWidget)
         self.menuBar = QtWidgets.QMenuBar(MainWindow)
-        self.menuBar.setGeometry(QtCore.QRect(0, 0, 922, 25))
+        self.menuBar.setGeometry(QtCore.QRect(0, 0, 922, 21))
         self.menuBar.setObjectName("menuBar")
         self.menuOPC_UA_Client = QtWidgets.QMenu(self.menuBar)
         self.menuOPC_UA_Client.setObjectName("menuOPC_UA_Client")
+        self.menuSettings = QtWidgets.QMenu(self.menuBar)
+        self.menuSettings.setObjectName("menuSettings")
         MainWindow.setMenuBar(self.menuBar)
         self.statusBar = QtWidgets.QStatusBar(MainWindow)
         self.statusBar.setObjectName("statusBar")
@@ -278,6 +280,9 @@ class Ui_MainWindow(object):
         self.actionRemoveFromGraph.setObjectName("actionRemoveFromGraph")
         self.actionCall = QtWidgets.QAction(MainWindow)
         self.actionCall.setObjectName("actionCall")
+        self.actionDark_Mode = QtWidgets.QAction(MainWindow)
+        self.actionDark_Mode.setCheckable(True)
+        self.actionDark_Mode.setObjectName("actionDark_Mode")
         self.menuOPC_UA_Client.addAction(self.actionConnect)
         self.menuOPC_UA_Client.addAction(self.actionDisconnect)
         self.menuOPC_UA_Client.addAction(self.actionCopyPath)
@@ -286,7 +291,9 @@ class Ui_MainWindow(object):
         self.menuOPC_UA_Client.addAction(self.actionUnsubscribeDataChange)
         self.menuOPC_UA_Client.addAction(self.actionSubscribeEvent)
         self.menuOPC_UA_Client.addAction(self.actionUnsubscribeEvents)
+        self.menuSettings.addAction(self.actionDark_Mode)
         self.menuBar.addAction(self.menuOPC_UA_Client.menuAction())
+        self.menuBar.addAction(self.menuSettings.menuAction())
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -295,6 +302,7 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "FreeOpcUa Client"))
         self.menuOPC_UA_Client.setTitle(_translate("MainWindow", "Act&ions"))
+        self.menuSettings.setTitle(_translate("MainWindow", "Settings"))
         self.attrDockWidget.setWindowTitle(_translate("MainWindow", "&Attributes"))
         self.attrRefreshButton.setText(_translate("MainWindow", "Refresh"))
         self.connectButton.setText(_translate("MainWindow", "Connect"))
@@ -330,4 +338,7 @@ class Ui_MainWindow(object):
         self.actionRemoveFromGraph.setShortcut(_translate("MainWindow", "Ctrl+Shift+G"))
         self.actionCall.setText(_translate("MainWindow", "Call"))
         self.actionCall.setToolTip(_translate("MainWindow", "Call Ua Method"))
+        self.actionDark_Mode.setText(_translate("MainWindow", "Dark Mode"))
+        self.actionDark_Mode.setStatusTip(_translate("MainWindow", "Enables Dark Mode Theme"))
+
 
