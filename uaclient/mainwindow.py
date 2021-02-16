@@ -5,9 +5,12 @@ import sys
 from datetime import datetime
 import logging
 
-from PyQt5.QtCore import pyqtSignal, QTimer, Qt, QObject, QSettings, QItemSelection, QCoreApplication
+from PyQt5.QtCore import pyqtSignal, QFile, QTimer, Qt, QObject, QSettings, QTextStream, QItemSelection, \
+    QCoreApplication
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QIcon
-from PyQt5.QtWidgets import QMainWindow, QWidget, QApplication, QMenu
+from PyQt5.QtWidgets import QMainWindow, QMessageBox, QWidget, QApplication, QMenu
+
+from uaclient.theme import breeze_resources
 
 from asyncua import ua
 from asyncua.sync import SyncNode
@@ -281,6 +284,8 @@ class Window(QMainWindow):
 
         self.ui.connectOptionButton.clicked.connect(self.show_connection_dialog)
 
+        self.ui.actionDark_Mode.triggered.connect(self.dark_mode)
+
     def _uri_changed(self, uri):
         self.uaclient.load_security_settings(uri)
 
@@ -431,6 +436,15 @@ class Window(QMainWindow):
         dia = CallMethodDialog(self, self.uaclient.client, node)
         dia.show()
 
+    def dark_mode(self):
+        self.settings.setValue("dark_mode", self.ui.actionDark_Mode.isChecked())
+        print(self.settings.value("dark_mode"))
+
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Information)
+        msg.setText("Restart for changes to take effect")
+        msg.exec_()
+
 
 def main():
     app = QApplication(sys.argv)
@@ -440,6 +454,13 @@ def main():
     logging.getLogger("uaclient").setLevel(logging.INFO)
     logging.getLogger("uawidgets").setLevel(logging.INFO)
     #logging.getLogger("opcua").setLevel(logging.INFO)  # to enable logging of ua client library
+
+    # set stylesheet
+    if (QSettings().value("dark_mode", "false") == "true"):
+        file = QFile(":/dark.qss")
+        file.open(QFile.ReadOnly | QFile.Text)
+        stream = QTextStream(file)
+        app.setStyleSheet(stream.readAll())
 
     client.show()
     sys.exit(app.exec_())
