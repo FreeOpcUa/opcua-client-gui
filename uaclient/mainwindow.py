@@ -438,7 +438,6 @@ class Window(QMainWindow):
 
     def dark_mode(self):
         self.settings.setValue("dark_mode", self.ui.actionDark_Mode.isChecked())
-        print(self.settings.value("dark_mode"))
 
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Information)
