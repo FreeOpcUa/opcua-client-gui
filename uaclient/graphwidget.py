@@ -87,7 +87,7 @@ class GraphUI(object):
             if node is None:
                 return
         if node not in self._node_list:
-            dtype = node.get_attribute(ua.AttributeIds.DataType)
+            dtype = node.read_attribute(ua.AttributeIds.DataType)
 
             dtypeStr = ua.ObjectIdNames[dtype.Value.Value.Identifier]
 
