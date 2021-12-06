@@ -2,7 +2,7 @@ from setuptools import setup
 
 
 setup(name="opcua-client",
-      version="0.8.2",
+      version="0.8.3",
       description="OPC-UA Client GUI",
       author="Olivier R-D",
       url='https://github.com/FreeOpcUa/opcua-client-gui',
