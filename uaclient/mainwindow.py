@@ -18,6 +18,7 @@ from asyncua.sync import SyncNode
 from uaclient.uaclient import UaClient
 from uaclient.mainwindow_ui import Ui_MainWindow
 from uaclient.connection_dialog import ConnectionDialog
+from uaclient.application_certificate_dialog import ApplicationCertificateDialog
 from uaclient.graphwidget import GraphUI
 
 from uawidgets import resources  # must be here for ressources even if not used
@@ -283,7 +284,7 @@ class Window(QMainWindow):
         self.ui.actionDisconnect.triggered.connect(self.disconnect)
 
         self.ui.connectOptionButton.clicked.connect(self.show_connection_dialog)
-
+        self.ui.actionClient_Application_Certificate.triggered.connect(self.show_application_certificate_dialog)
         self.ui.actionDark_Mode.triggered.connect(self.dark_mode)
 
     def _uri_changed(self, uri):
@@ -293,15 +294,25 @@ class Window(QMainWindow):
         dia = ConnectionDialog(self, self.ui.addrComboBox.currentText())
         dia.security_mode = self.uaclient.security_mode
         dia.security_policy = self.uaclient.security_policy
-        dia.certificate_path = self.uaclient.certificate_path
-        dia.private_key_path = self.uaclient.private_key_path
+        dia.certificate_path = self.uaclient.user_certificate_path
+        dia.private_key_path = self.uaclient.user_private_key_path
         ret = dia.exec_()
         if ret:
             self.uaclient.security_mode = dia.security_mode
             self.uaclient.security_policy = dia.security_policy
-            self.uaclient.certificate_path = dia.certificate_path
-            self.uaclient.private_key_path = dia.private_key_path
+            self.uaclient.user_certificate_path = dia.certificate_path
+            self.uaclient.user_private_key_path = dia.private_key_path
 
+    def show_application_certificate_dialog(self):
+        dia = ApplicationCertificateDialog(self)
+        dia.certificate_path = self.uaclient.application_certificate_path
+        dia.private_key_path = self.uaclient.application_private_key_path
+        ret = dia.exec_()
+        if ret == QDialog.Accepted:
+            self.uaclient.application_certificate_path = dia.certificate_path
+            self.uaclient.application_private_key_path = dia.private_key_path
+        self.uaclient.save_application_certificate_settings()
+            
     @trycatchslot
     def show_refs(self, selection):
         if isinstance(selection, QItemSelection):
