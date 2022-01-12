@@ -283,6 +283,8 @@ class Ui_MainWindow(object):
         self.actionDark_Mode = QtWidgets.QAction(MainWindow)
         self.actionDark_Mode.setCheckable(True)
         self.actionDark_Mode.setObjectName("actionDark_Mode")
+        self.actionClient_Application_Certificate = QtWidgets.QAction(MainWindow)
+        self.actionClient_Application_Certificate.setObjectName("actionClient_Application_Certificate")
         self.menuOPC_UA_Client.addAction(self.actionConnect)
         self.menuOPC_UA_Client.addAction(self.actionDisconnect)
         self.menuOPC_UA_Client.addAction(self.actionCopyPath)
@@ -292,6 +294,7 @@ class Ui_MainWindow(object):
         self.menuOPC_UA_Client.addAction(self.actionSubscribeEvent)
         self.menuOPC_UA_Client.addAction(self.actionUnsubscribeEvents)
         self.menuSettings.addAction(self.actionDark_Mode)
+        self.menuSettings.addAction(self.actionClient_Application_Certificate)
         self.menuBar.addAction(self.menuOPC_UA_Client.menuAction())
         self.menuBar.addAction(self.menuSettings.menuAction())
 
@@ -340,5 +343,5 @@ class Ui_MainWindow(object):
         self.actionCall.setToolTip(_translate("MainWindow", "Call Ua Method"))
         self.actionDark_Mode.setText(_translate("MainWindow", "Dark Mode"))
         self.actionDark_Mode.setStatusTip(_translate("MainWindow", "Enables Dark Mode Theme"))
-
-
+        self.actionClient_Application_Certificate.setText(_translate("MainWindow", "Client Application Certificate"))
+        
