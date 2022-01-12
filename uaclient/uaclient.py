@@ -28,8 +28,11 @@ class UaClient(object):
         self._subs_ev = {}
         self.security_mode = None
         self.security_policy = None
-        self.certificate_path = None
-        self.private_key_path = None
+        self.user_certificate_path = None
+        self.user_private_key_path = None
+        self.application_certificate_path = None
+        self.application_private_key_path = None
+        self.load_application_certificate_settings()
 
     def _reset(self):
         self.client = None
@@ -53,8 +56,8 @@ class UaClient(object):
     def load_security_settings(self, uri):
         self.security_mode = None
         self.security_policy = None
-        self.certificate_path = None
-        self.private_key_path = None
+        self.user_certificate_path = None
+        self.user_private_key_path = None
 
         mysettings = self.settings.value("security_settings", None)
         if mysettings is None:
@@ -63,8 +66,8 @@ class UaClient(object):
             mode, policy, cert, key = mysettings[uri]
             self.security_mode = mode
             self.security_policy = policy
-            self.certificate_path = cert
-            self.private_key_path = key
+            self.user_certificate_path = cert
+            self.user_private_key_path = key
 
     def save_security_settings(self, uri):
         mysettings = self.settings.value("security_settings", None)
@@ -72,22 +75,48 @@ class UaClient(object):
             mysettings = {}
         mysettings[uri] = [self.security_mode,
                            self.security_policy,
-                           self.certificate_path,
-                           self.private_key_path]
+                           self.user_certificate_path,
+                           self.user_private_key_path]
         self.settings.setValue("security_settings", mysettings)
 
+    def load_application_certificate_settings(self):
+        self.application_certificate_path = None
+        self.application_private_key_path = None
+
+        mysettings = self.settings.value("application_certificate_settings", None)
+        if mysettings is None:
+            return
+        self.application_certificate_path = mysettings["application_certificate"]
+        self.application_private_key_path = mysettings["application_private_key"]
+
+    def save_application_certificate_settings(self):
+        mysettings = self.settings.value("application_certificate_settings", None)
+        if mysettings is None:
+            mysettings = {}
+        mysettings["application_certificate"] = self.application_certificate_path
+        mysettings["application_private_key"] = self.application_private_key_path
+        self.settings.setValue("application_certificate_settings", mysettings)
+    
     def get_node(self, nodeid):
         return self.client.get_node(nodeid)
 
     def connect(self, uri):
         self.disconnect()
-        logger.info("Connecting to %s with parameters %s, %s, %s, %s", uri, self.security_mode, self.security_policy, self.certificate_path, self.private_key_path)
+        logger.info("Connecting to %s with parameters %s, %s, %s, %s", uri, self.security_mode, self.security_policy, self.user_certificate_path, self.user_private_key_path)
         self.client = Client(uri)
+        self.client.application_uri = self.application_uri
+        self.client.description = "FreeOpcUa Client GUI"
+        
+        # Set user identity token
+        self.client.load_private_key(self.user_private_key_path)
+        self.client.load_client_certificate(self.user_certificate_path)
+
+        # Set security mode and security policy
         if self.security_mode is not None and self.security_policy is not None:
             self.client.set_security(
                 getattr(crypto.security_policies, 'SecurityPolicy' + self.security_policy),
-                self.certificate_path,
-                self.private_key_path,
+                self.application_certificate_path,
+                self.application_private_key_path,
                 mode=getattr(ua.MessageSecurityMode, self.security_mode)
             )
         self.client.connect()
