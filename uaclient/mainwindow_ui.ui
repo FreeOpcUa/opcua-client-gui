@@ -81,6 +81,7 @@
      <string>Settings</string>
     </property>
     <addaction name="actionDark_Mode"/>
+    <addaction name="actionClient_Application_Certificate"/>
    </widget>
    <addaction name="menuOPC_UA_Client"/>
    <addaction name="menuSettings"/>
@@ -518,6 +519,11 @@
    </property>
    <property name="statusTip">
     <string>Enables Dark Mode Theme</string>
+   </property>
+  </action>
+  <action name="actionClient_Application_Certificate">
+   <property name="text">
+    <string>Client Application Certificate</string>
    </property>
   </action>
  </widget>
