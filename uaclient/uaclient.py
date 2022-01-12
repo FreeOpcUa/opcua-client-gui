@@ -19,6 +19,7 @@ class UaClient(object):
 
     def __init__(self):
         self.settings = QSettings()
+        self.application_uri = "urn:freeopcua:client-gui"
         self.client = None
         self._connected = False
         self._datachange_sub = None
