@@ -96,7 +96,7 @@ class UaClient(object):
         mysettings["application_certificate"] = self.application_certificate_path
         mysettings["application_private_key"] = self.application_private_key_path
         self.settings.setValue("application_certificate_settings", mysettings)
-    
+
     def get_node(self, nodeid):
         return self.client.get_node(nodeid)
 
@@ -106,10 +106,12 @@ class UaClient(object):
         self.client = Client(uri)
         self.client.application_uri = self.application_uri
         self.client.description = "FreeOpcUa Client GUI"
-        
+
         # Set user identity token
-        self.client.load_private_key(self.user_private_key_path)
-        self.client.load_client_certificate(self.user_certificate_path)
+        if self.user_private_key_path:
+            self.client.load_private_key(self.user_private_key_path)
+        if self.user_certificate_path:
+            self.client.load_client_certificate(self.user_certificate_path)
 
         # Set security mode and security policy
         if self.security_mode is not None and self.security_policy is not None:
