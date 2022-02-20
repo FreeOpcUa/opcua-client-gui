@@ -37,6 +37,9 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="focusPolicy">
+        <enum>Qt::StrongFocus</enum>
+       </property>
        <property name="contextMenuPolicy">
         <enum>Qt::ActionsContextMenu</enum>
        </property>
@@ -122,6 +125,9 @@
     <layout class="QGridLayout" name="gridLayout_4">
      <item row="0" column="0" colspan="2">
       <widget class="QTreeView" name="attrView">
+       <property name="focusPolicy">
+        <enum>Qt::StrongFocus</enum>
+       </property>
        <property name="sizeAdjustPolicy">
         <enum>QAbstractScrollArea::AdjustToContents</enum>
        </property>
@@ -197,6 +203,9 @@
     <layout class="QGridLayout" name="gridLayout">
      <item row="1" column="4">
       <widget class="QPushButton" name="connectButton">
+       <property name="focusPolicy">
+        <enum>Qt::StrongFocus</enum>
+       </property>
        <property name="text">
         <string>Connect</string>
        </property>
@@ -204,6 +213,9 @@
      </item>
      <item row="1" column="5">
       <widget class="QPushButton" name="disconnectButton">
+       <property name="focusPolicy">
+        <enum>Qt::StrongFocus</enum>
+       </property>
        <property name="text">
         <string>Disconnect</string>
        </property>
@@ -227,6 +239,9 @@
      </item>
      <item row="1" column="3">
       <widget class="QPushButton" name="connectOptionButton">
+       <property name="focusPolicy">
+        <enum>Qt::StrongFocus</enum>
+       </property>
        <property name="text">
         <string>Connect options</string>
        </property>
@@ -258,6 +273,9 @@
     <layout class="QGridLayout" name="gridLayout_3">
      <item row="0" column="0">
       <widget class="QTableView" name="subView">
+       <property name="focusPolicy">
+        <enum>Qt::StrongFocus</enum>
+       </property>
        <property name="acceptDrops">
         <bool>true</bool>
        </property>
@@ -266,6 +284,9 @@
        </property>
        <property name="editTriggers">
         <set>QAbstractItemView::NoEditTriggers</set>
+       </property>
+       <property name="tabKeyNavigation">
+        <bool>false</bool>
        </property>
        <property name="dragDropOverwriteMode">
         <bool>false</bool>
@@ -301,8 +322,14 @@
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
       <widget class="QTableView" name="refView">
+       <property name="focusPolicy">
+        <enum>Qt::StrongFocus</enum>
+       </property>
        <property name="editTriggers">
         <set>QAbstractItemView::NoEditTriggers</set>
+       </property>
+       <property name="tabKeyNavigation">
+        <bool>false</bool>
        </property>
       </widget>
      </item>
@@ -326,6 +353,9 @@
     <layout class="QGridLayout" name="gridLayout_5">
      <item row="0" column="0">
       <widget class="QListView" name="evView">
+       <property name="focusPolicy">
+        <enum>Qt::StrongFocus</enum>
+       </property>
        <property name="acceptDrops">
         <bool>true</bool>
        </property>
@@ -538,6 +568,22 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <tabstops>
+  <tabstop>addrComboBox</tabstop>
+  <tabstop>connectOptionButton</tabstop>
+  <tabstop>connectButton</tabstop>
+  <tabstop>disconnectButton</tabstop>
+  <tabstop>treeView</tabstop>
+  <tabstop>attrView</tabstop>
+  <tabstop>attrRefreshButton</tabstop>
+  <tabstop>subView</tabstop>
+  <tabstop>refView</tabstop>
+  <tabstop>evView</tabstop>
+  <tabstop>spinBoxNumberOfPoints</tabstop>
+  <tabstop>spinBoxIntervall</tabstop>
+  <tabstop>buttonApply</tabstop>
+  <tabstop>logTextEdit</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
