@@ -169,10 +169,16 @@ class DataChangeUI(object):
             if node is None:
                 return
         if node in self._subscribed_nodes:
-            logger.warning("allready subscribed to node: %s ", node)
+            logger.warning("already subscribed to node: %s ", node)
             return
-        self.model.setHorizontalHeaderLabels(["DisplayName", "Value", "Timestamp"])
-        text = str(node.read_display_name().Text)
+
+        if QSettings().value("sub_identifier_mode", False, bool):
+            self.model.setHorizontalHeaderLabels(["Identifier", "Value", "Timestamp"])
+            text = str(node.nodeid.Identifier)
+        else:
+            self.model.setHorizontalHeaderLabels(["DisplayName", "Value", "Timestamp"])
+            text = str(node.read_display_name().Text)
+
         row = [QStandardItem(text), QStandardItem("No Data yet"), QStandardItem("")]
         row[0].setData(node)
         self.model.appendRow(row)
@@ -285,6 +291,7 @@ class Window(QMainWindow):
 
         self.ui.connectOptionButton.clicked.connect(self.show_connection_dialog)
         self.ui.actionClient_Application_Certificate.triggered.connect(self.show_application_certificate_dialog)
+        self.ui.actionSubIdentifier_Mode.triggered.connect(self.sub_identifier_mode)
         self.ui.actionDark_Mode.triggered.connect(self.dark_mode)
 
     def _uri_changed(self, uri):
@@ -447,6 +454,9 @@ class Window(QMainWindow):
         dia = CallMethodDialog(self, self.uaclient.client, node)
         dia.show()
 
+    def sub_identifier_mode(self):
+        self.settings.setValue("sub_identifier_mode", self.ui.actionSubIdentifier_Mode.isChecked())
+
     def dark_mode(self):
         self.settings.setValue("dark_mode", self.ui.actionDark_Mode.isChecked())
 
@@ -463,10 +473,10 @@ def main():
     logging.getLogger().addHandler(handler)
     logging.getLogger("uaclient").setLevel(logging.INFO)
     logging.getLogger("uawidgets").setLevel(logging.INFO)
-    #logging.getLogger("opcua").setLevel(logging.INFO)  # to enable logging of ua client library
+    # logging.getLogger("opcua").setLevel(logging.INFO)  # to enable logging of ua client library
 
     # set stylesheet
-    if (QSettings().value("dark_mode", "false") == "true"):
+    if QSettings().value("dark_mode", False, bool):
         file = QFile(":/dark.qss")
         file.open(QFile.ReadOnly | QFile.Text)
         stream = QTextStream(file)
