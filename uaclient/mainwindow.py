@@ -8,7 +8,7 @@ import logging
 from PyQt5.QtCore import pyqtSignal, QFile, QTimer, Qt, QObject, QSettings, QTextStream, QItemSelection, \
     QCoreApplication
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QIcon
-from PyQt5.QtWidgets import QMainWindow, QMessageBox, QWidget, QApplication, QMenu
+from PyQt5.QtWidgets import QMainWindow, QMessageBox, QWidget, QApplication, QMenu, QHeaderView
 
 from uaclient.theme import breeze_resources
 
@@ -131,7 +131,9 @@ class DataChangeUI(object):
         self._subscribed_nodes = []
         self.model = QStandardItemModel()
         self.window.ui.subView.setModel(self.model)
-        self.window.ui.subView.horizontalHeader().setSectionResizeMode(1)
+
+        for i in range(self.window.ui.subView.horizontalHeader().count()):
+            self.window.ui.subView.horizontalHeader().setSectionResizeMode(i, QHeaderView.Stretch)
 
         self.window.ui.actionSubscribeDataChange.triggered.connect(self._subscribe)
         self.window.ui.actionUnsubscribeDataChange.triggered.connect(self._unsubscribe)
