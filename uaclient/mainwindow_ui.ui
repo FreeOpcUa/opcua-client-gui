@@ -191,6 +191,9 @@
    <property name="allowedAreas">
     <set>Qt::TopDockWidgetArea</set>
    </property>
+   <property name="windowTitle">
+    <string>Connection</string>
+   </property>
    <attribute name="dockWidgetArea">
     <number>4</number>
    </attribute>
@@ -372,6 +375,9 @@
    </widget>
   </widget>
   <widget class="QDockWidget" name="logDockWidget_2">
+   <property name="windowTitle">
+    <string>&amp;Logs</string>
+   </property>
    <attribute name="dockWidgetArea">
     <number>8</number>
    </attribute>

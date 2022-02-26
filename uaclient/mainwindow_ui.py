@@ -383,3 +383,5 @@ class Ui_MainWindow(object):
         self.actionClient_Application_Certificate.setText(_translate("MainWindow", "Client Application Certificate"))
         self.actionFocusTree.setText(_translate("MainWindow", "FocusTree"))
         self.actionFocusTree.setShortcut(_translate("MainWindow", "Alt+T"))
+        self.addrDockWidget.setWindowTitle(_translate("MainWindow", "Connection Options"))
+        self.logDockWidget_2.setWindowTitle(_translate("MainWindow", "Logs"))
