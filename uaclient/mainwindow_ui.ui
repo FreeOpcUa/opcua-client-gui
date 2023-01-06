@@ -85,6 +85,7 @@
     </property>
     <addaction name="actionDark_Mode"/>
     <addaction name="actionClient_Application_Certificate"/>
+    <addaction name="actionSubIdentifier_Mode"/>
    </widget>
    <addaction name="menuOPC_UA_Client"/>
    <addaction name="menuSettings"/>
@@ -189,6 +190,9 @@
    </property>
    <property name="allowedAreas">
     <set>Qt::TopDockWidgetArea</set>
+   </property>
+   <property name="windowTitle">
+    <string>Connection</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>4</number>
@@ -371,6 +375,9 @@
    </widget>
   </widget>
   <widget class="QDockWidget" name="logDockWidget_2">
+   <property name="windowTitle">
+    <string>&amp;Logs</string>
+   </property>
    <attribute name="dockWidgetArea">
     <number>8</number>
    </attribute>
@@ -564,6 +571,17 @@
   <action name="actionClient_Application_Certificate">
    <property name="text">
     <string>Client Application Certificate</string>
+   </property>
+  </action>
+  <action name="actionSubIdentifier_Mode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Name Subscription with Identifier</string>
+   </property>
+   <property name="statusTip">
+    <string>Enables naming Subscription with Identifier</string>
    </property>
   </action>
  </widget>
