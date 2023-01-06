@@ -50,3 +50,10 @@ TODO (listed after priority):
 
 To update to the latest release run: `pip install opcua-client --upgrade`
 
+### MacOS
+
+1. Make sure python, python-pip and homebrew is installed
+2. `brew install pyqt@5`
+3. `pip3 install opcua-client pyqtgraph cryptography numpy`
+4. Run with `opcua-client`
+

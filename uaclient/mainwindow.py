@@ -8,7 +8,7 @@ import logging
 from PyQt5.QtCore import pyqtSignal, QFile, QTimer, Qt, QObject, QSettings, QTextStream, QItemSelection, \
     QCoreApplication
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QIcon
-from PyQt5.QtWidgets import QMainWindow, QMessageBox, QWidget, QApplication, QMenu, QHeaderView
+from PyQt5.QtWidgets import QMainWindow, QMessageBox, QWidget, QApplication, QMenu, QDialog, QHeaderView
 
 from uaclient.theme import breeze_resources
 
