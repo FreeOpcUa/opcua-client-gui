@@ -29,7 +29,8 @@ class GraphUI(object):
 
     # use tango color schema (public domain)
     colorCycle = ['#4e9a06ff', '#ce5c00ff', '#3465a4ff', '#75507bff', '#cc0000ff', '#edd400ff']
-    acceptedDatatypes = ['Decimal128', 'Double', 'Float', 'Integer', 'UInteger']
+    acceptedDatatypes = ['Decimal128', 'Double', 'Float', 'Integer', 'UInteger', 
+                        'Int16', 'Int32', 'Int64', 'UInt16', 'UInt32', 'UInt64', 'SByte']
 
     def __init__(self, window, uaclient):
         self.window = window
