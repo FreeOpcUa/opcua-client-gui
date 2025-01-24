@@ -1,0 +1,69 @@
+name: Build and Release Executable
+
+on:
+  push:
+    tags:
+      - '*.*.*'
+  workflow_dispatch:  # enable manual triggerring
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.8'
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyinstaller asyncua opcua-widgets>=0.6.0 PyQt5 pyqtgraph numpy
+
+    - name: Build Executable
+      run: |
+        pyinstaller --onefile uaclient/mainwindow.py
+        mv dist/mainwindow.exe opcua-client-gui.exe
+
+    - name: Upload Executable as Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: opcua-client
+        path: opcua-client-gui.exe
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Download Build Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: opcua-client
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      with:
+        tag_name: ${{ github.ref_name }}
+        release_name: Release ${{ github.ref_name }}
+        body: |
+          This release includes the standalone executable for opcua-client GUI.
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: opcua-client-gui.exe
+        asset_name: opcua-client-gui.exe
+        asset_content_type: application/octet-stream
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
