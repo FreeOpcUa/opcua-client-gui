@@ -122,12 +122,12 @@ class UaClient:
             )
         self.client.connect()
         self._connected = True
-        self.client.load_data_type_definitions()
         try:
+            self.client.load_data_type_definitions()
             self.client.load_enums()
             self.client.load_type_definitions()
         except Exception:
-            logger.exception("Loading custom stuff with spec <= 1.03 did not work")
+            logger.exception("Loading custom types failed (server may pre-date spec 1.04)")
         self.save_security_settings(uri)
 
     def disconnect(self) -> None:

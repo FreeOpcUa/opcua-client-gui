@@ -144,10 +144,10 @@ class EventUI:
     @trycatchslot
     def _unsubscribe(self) -> None:
         node = self.window.get_current_node()
-        if node is None:
+        if node is None or node not in self._subscribed_nodes:
             return
-        self._subscribed_nodes.remove(node)
         self.uaclient.unsubscribe_events(node)
+        self._subscribed_nodes.remove(node)
 
     @trycatchslot
     def _update_event_model(self, event: Any) -> None:
@@ -162,6 +162,7 @@ class DataChangeUI:
         self._subhandler = DataChangeHandler()
         self._subscribed_nodes: list[SyncNode] = []
         self.model = QStandardItemModel()
+        self.model.setHorizontalHeaderLabels(["DisplayName", "Value", "Timestamp"])
         self.window.ui.subView.setModel(self.model)
         header = self.window.ui.subView.horizontalHeader()
         assert header is not None
@@ -218,7 +219,6 @@ class DataChangeUI:
         if node in self._subscribed_nodes:
             logger.warning("already subscribed to node: %s ", node)
             return
-        self.model.setHorizontalHeaderLabels(["DisplayName", "Value", "Timestamp"])
         text = str(node.read_display_name().Text)
         row = [QStandardItem(text), QStandardItem("No Data yet"), QStandardItem("")]
         row[0].setData(node)
@@ -236,7 +236,7 @@ class DataChangeUI:
     @trycatchslot
     def _unsubscribe(self) -> None:
         node = self.window.get_current_node()
-        if node is None:
+        if node is None or node not in self._subscribed_nodes:
             return
         self.uaclient.unsubscribe_datachange(node)
         self._subscribed_nodes.remove(node)

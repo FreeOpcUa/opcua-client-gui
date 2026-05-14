@@ -58,7 +58,10 @@ class ConnectionDialog(QDialog):
 
     @security_mode.setter
     def security_mode(self, value: str | None) -> None:
-        self.ui.modeComboBox.setCurrentText(value or "None")
+        text = value or "None"
+        if self.ui.modeComboBox.findText(text) == -1:
+            self.ui.modeComboBox.addItem(text)
+        self.ui.modeComboBox.setCurrentText(text)
 
     @property
     def security_policy(self) -> str | None:
@@ -69,7 +72,10 @@ class ConnectionDialog(QDialog):
 
     @security_policy.setter
     def security_policy(self, value: str | None) -> None:
-        self.ui.policyComboBox.setCurrentText(value or "None")
+        text = value or "None"
+        if self.ui.policyComboBox.findText(text) == -1:
+            self.ui.policyComboBox.addItem(text)
+        self.ui.policyComboBox.setCurrentText(text)
 
     @property
     def certificate_path(self) -> str:
