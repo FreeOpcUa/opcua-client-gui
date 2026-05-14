@@ -6,7 +6,7 @@ from typing import Any
 from asyncua.sync import Server
 
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QAbstractItemView, QApplication
+from PyQt6.QtWidgets import QApplication
 
 from uaclient.mainwindow import Window
 
@@ -82,15 +82,20 @@ class TestAutoReconnect(unittest.TestCase):
             app.processEvents()
             time.sleep(0.05)
 
-    def test_widgets_go_read_only_when_server_dies(self) -> None:
-        edit_on = self.client.attrs_ui.view.editTriggers()
-        self.assertEqual(edit_on, QAbstractItemView.EditTrigger.DoubleClicked)
+    def test_widgets_grey_out_when_server_dies(self) -> None:
+        self.assertTrue(self.client.ui.treeView.isEnabled())
+        self.assertTrue(self.client.ui.disconnectButton.isEnabled())
+        self.assertFalse(self.client.ui.connectButton.isEnabled())
 
         self.server.stop()
         self._pump(5)
 
-        edit_off = self.client.attrs_ui.view.editTriggers()
-        self.assertEqual(edit_off, QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.assertFalse(self.client.ui.treeView.isEnabled())
+        self.assertFalse(self.client.ui.attrView.isEnabled())
+        self.assertFalse(self.client.ui.refView.isEnabled())
+        # The user can still abort an in-progress reconnect.
+        self.assertTrue(self.client.ui.disconnectButton.isEnabled())
+        self.assertFalse(self.client.ui.connectButton.isEnabled())
         self.assertIn("auto-reconnect", self.client.ui.statusBar.currentMessage())
 
         # Re-bind the same port and verify the supervisor reconnects.
@@ -99,10 +104,9 @@ class TestAutoReconnect(unittest.TestCase):
         self.server.start()
         self._pump(15)
 
-        self.assertEqual(
-            self.client.attrs_ui.view.editTriggers(),
-            QAbstractItemView.EditTrigger.DoubleClicked,
-        )
+        self.assertTrue(self.client.ui.treeView.isEnabled())
+        self.assertTrue(self.client.ui.attrView.isEnabled())
+        self.assertTrue(self.client.ui.refView.isEnabled())
 
 
 if __name__ == "__main__":

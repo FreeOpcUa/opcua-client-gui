@@ -345,6 +345,8 @@ class Window(QMainWindow):
             self._on_connection_state_changed, type=Qt.ConnectionType.QueuedConnection  # type: ignore[call-arg]
         )
 
+        self._apply_ui_state("idle")
+
     def _uri_changed(self, uri: str) -> None:
         self.uaclient.load_security_settings(uri)
 
@@ -400,25 +402,62 @@ class Window(QMainWindow):
 
     def _on_connection_state_changed(self, state: str) -> None:
         """Slot for UaClient.connection_state_changed; runs on the GUI thread."""
-        connected = state == "connected"
-        if connected:
+        if state == "connected":
             logger.info("Connection re-established")
-            self.ui.statusBar.hide()
+            self._apply_ui_state("connected")
         else:
             logger.warning("Connection state: %s", state)
+            self._apply_ui_state("reconnecting")
+
+    def _apply_ui_state(self, state: str) -> None:
+        """Drive the buttons / widgets from the connection state.
+
+        state in {"idle", "connected", "reconnecting"}:
+          - idle: nothing to disconnect from. Connect on, Disconnect off,
+            interactive views grayed.
+          - connected: full interactivity. Connect off, Disconnect on.
+          - reconnecting: supervisor is reconnecting on our behalf. Connect
+            off, Disconnect on (so the user can give up). All views grayed
+            and a banner is shown.
+        """
+        connected = state == "connected"
+        has_session = state in ("connected", "reconnecting")
+
+        self.ui.connectButton.setEnabled(not has_session)
+        self.ui.actionConnect.setEnabled(not has_session)
+        self.ui.disconnectButton.setEnabled(has_session)
+        self.ui.actionDisconnect.setEnabled(has_session)
+
+        for view in (
+            self.ui.treeView,
+            self.ui.attrView,
+            self.ui.refView,
+            self.ui.subView,
+            self.ui.evView,
+            self.ui.graphDockWidget,
+        ):
+            view.setEnabled(connected)
+
+        for action in (
+            self.ui.actionSubscribeDataChange,
+            self.ui.actionUnsubscribeDataChange,
+            self.ui.actionSubscribeEvent,
+            self.ui.actionUnsubscribeEvents,
+            self.ui.actionCopyPath,
+            self.ui.actionCopyNodeId,
+        ):
+            action.setEnabled(connected)
+        if not connected:
+            # _update_actions_state re-enables this on its own when the
+            # next Method node is selected.
+            self.ui.actionCall.setEnabled(False)
+
+        if state == "reconnecting":
             self.ui.statusBar.show()
             self.ui.statusBar.setStyleSheet("QStatusBar { background-color : orange; color : black; }")
-            self.ui.statusBar.showMessage(f"Disconnected from server (state: {state}); auto-reconnect in progress…")
-        self._set_widgets_read_only(not connected)
-
-    def _set_widgets_read_only(self, read_only: bool) -> None:
-        self.attrs_ui.set_read_only(read_only)
-        self.refs_ui.set_read_only(read_only)
-        self.ui.actionCall.setEnabled(not read_only and self.ui.actionCall.isEnabled())
-        self.ui.actionSubscribeDataChange.setEnabled(not read_only)
-        self.ui.actionUnsubscribeDataChange.setEnabled(not read_only)
-        self.ui.actionSubscribeEvent.setEnabled(not read_only)
-        self.ui.actionUnsubscribeEvents.setEnabled(not read_only)
+            self.ui.statusBar.showMessage("Disconnected from server; auto-reconnect in progress…")
+        else:
+            self.ui.statusBar.hide()
 
     def get_current_node(self, idx: QModelIndex | None = None) -> SyncNode | None:
         return self.tree_ui.get_current_node(idx)
@@ -440,6 +479,7 @@ class Window(QMainWindow):
         self.tree_ui.set_root_node(self.uaclient.client.nodes.root)
         self.ui.treeView.setFocus()
         self.load_current_node()
+        self._apply_ui_state("connected")
 
     def _update_address_list(self, uri: str) -> None:
         if uri == self._address_list[0]:
@@ -463,6 +503,7 @@ class Window(QMainWindow):
             self.attrs_ui.clear()
             self.datachange_ui.clear()
             self.event_ui.clear()
+            self._apply_ui_state("idle")
 
     def closeEvent(self, event: QCloseEvent | None) -> None:
         assert event is not None
