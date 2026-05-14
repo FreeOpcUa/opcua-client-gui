@@ -468,6 +468,7 @@ class Window(QMainWindow):
         self.settings.setValue("main_window_state", self.saveState())
         self.settings.setValue("address_list", self._address_list)
         self.disconnect()
+        self.uaclient.shutdown()
         event.accept()
 
     def save_current_node(self) -> None:
