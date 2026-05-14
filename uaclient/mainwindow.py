@@ -7,6 +7,7 @@ from PyQt6.QtCore import (
     QCoreApplication,
     QFile,
     QItemSelection,
+    QLoggingCategory,
     QMimeData,
     QModelIndex,
     QObject,
@@ -49,6 +50,11 @@ from uawidgets.utils import trycatchslot
 
 
 logger = logging.getLogger(__name__)
+
+# The bundled tree icons are Inkscape-exported SVGs full of Gaussian-blur
+# filters with no viewBox; Qt6's SVG painter logs "buffer size too big" for
+# each render. Icons still draw correctly, so silence just this category.
+QLoggingCategory.setFilterRules("qt.svg.draw.warning=false")
 
 
 class DataChangeHandler(QObject):
