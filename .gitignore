@@ -18,3 +18,4 @@ dist
 *.egg-info
 *.swp
 
+uawidgets/

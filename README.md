@@ -32,28 +32,27 @@ TODO (listed after priority):
 * Maybe read history
 * Something else?
 
-# How to Install  
+# How to Install
 
-*Note: PyQT 5 is required.*
+*Note: PyQt 6 is required (Python 3.9 or newer).*
 
 ### Linux:
 
-1. Make sure python and python-pip is installed  
-2. `pip3 install opcua-client`  
-4. Run with: `opcua-client`  
-  
-### Windows:  
+1. Make sure python and python-pip is installed
+2. `pip3 install opcua-client`
+3. Run with: `opcua-client`
 
-1. Install winpython https://winpython.github.io/ , install the version including pyqt5!
-3. Use pip to install opcua-client: `pip install opcua-client`  
-4. Run via the script pip created: `YOUR_INSTALL_PATH\Python\Python35\Scripts\opcua-client.exe`  
+### Windows:
+
+1. Install a recent Python from python.org
+2. `pip install opcua-client`
+3. Run via the script pip created: `YOUR_INSTALL_PATH\Python\Scripts\opcua-client.exe`
 
 To update to the latest release run: `pip install opcua-client --upgrade`
 
 ### MacOS
 
-1. Make sure python, python-pip and homebrew is installed
-2. `brew install pyqt@5`
-3. `pip3 install opcua-client pyqtgraph cryptography numpy`
-4. Run with `opcua-client`
+1. Make sure python and python-pip are installed
+2. `pip3 install opcua-client`
+3. Run with `opcua-client`
 

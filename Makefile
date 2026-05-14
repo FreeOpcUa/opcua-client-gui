@@ -1,7 +1,7 @@
 all:
-	pyuic5 uaclient/mainwindow_ui.ui -o uaclient/mainwindow_ui.py
-	pyuic5 uaclient/connection_ui.ui -o uaclient/connection_ui.py
-	pyrcc5 uawidgets/resources.qrc -o uawidgets/resources.py
+	pyuic6 uaclient/mainwindow_ui.ui -o uaclient/mainwindow_ui.py
+	pyuic6 uaclient/connection_ui.ui -o uaclient/connection_ui.py
+	pyuic6 uaclient/applicationcertificate_ui.ui -o uaclient/applicationcertificate_ui.py
 run:
 	PYTHONPATH=$(shell pwd)
 	python3 app.py

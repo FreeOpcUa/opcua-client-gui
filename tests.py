@@ -1,18 +1,10 @@
-
-import unittest
 import sys
-print("SYS:PATH", sys.path)
-sys.path.insert(0, "python-opcua")
-sys.path.insert(0, "opcua-widgets")
-import os
-print("PWD", os.getcwd())
+import unittest
 
-from opcua import ua
-from opcua import Server
+from asyncua.sync import Server
 
-from PyQt5.QtCore import QTimer, QSettings, QModelIndex, Qt, QCoreApplication
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtTest import QTest
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QApplication
 
 from uaclient.mainwindow import Window
 
@@ -32,11 +24,14 @@ class TestClient(unittest.TestCase):
         self.server.stop()
 
     def get_attr_value(self, text):
-        idxlist = self.client.attrs_ui.model.match(self.client.attrs_ui.model.index(0, 0), Qt.DisplayRole, text,  1, Qt.MatchExactly | Qt.MatchRecursive)
+        idxlist = self.client.attrs_ui.model.match(
+            self.client.attrs_ui.model.index(0, 0),
+            Qt.ItemDataRole.DisplayRole, text, 1,
+            Qt.MatchFlag.MatchExactly | Qt.MatchFlag.MatchRecursive)
         idx = idxlist[0]
         idx = idx.sibling(idx.row(), 1)
         item = self.client.attrs_ui.model.itemFromIndex(idx)
-        return item.data(Qt.UserRole).value
+        return item.data(Qt.ItemDataRole.UserRole).value
 
     def test_select_objects(self):
         objects = self.server.nodes.objects
@@ -57,7 +52,6 @@ class TestClient(unittest.TestCase):
 
         data = self.get_attr_value("NodeId")
         self.assertEqual(data, server_node.nodeid)
-
 
 
 if __name__ == "__main__":

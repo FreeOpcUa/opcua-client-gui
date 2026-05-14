@@ -1,8 +1,8 @@
 #! /usr/bin/env python3
 
 import logging
-from PyQt5.QtCore import QTimer, Qt
-from PyQt5.QtWidgets import QLabel
+from PyQt6.QtCore import QTimer, Qt
+from PyQt6.QtWidgets import QLabel
 
 from asyncua import ua
 from asyncua.sync import SyncNode
@@ -96,7 +96,7 @@ class GraphUI(object):
                 displayName = node.read_display_name().Text
                 colorIndex = len(self._node_list) % len(self.colorCycle)
                 self._curves.append \
-                    (self.pw.plot(pen=pg.mkPen(color=self.colorCycle[colorIndex], width=3, style=Qt.SolidLine), name=displayName))
+                    (self.pw.plot(pen=pg.mkPen(color=self.colorCycle[colorIndex], width=3, style=Qt.PenStyle.SolidLine), name=displayName))
                 # set initial data to zero
                 self._channels.append(np.zeros(self.N))  # init data sequence with zeros
                 # add the new channel data to the new curve

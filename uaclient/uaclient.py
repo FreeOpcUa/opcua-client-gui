@@ -1,6 +1,6 @@
 import logging
 
-from PyQt5.QtCore import QSettings
+from PyQt6.QtCore import QSettings
 
 from asyncua import ua
 from asyncua.sync import Client, SyncNode
@@ -133,7 +133,7 @@ class UaClient(object):
 
     def disconnect(self):
         if self._connected:
-            print("Disconnecting from server")
+            logger.info("Disconnecting from server")
             self._connected = False
             try:
                 self.client.disconnect()
@@ -152,7 +152,6 @@ class UaClient(object):
 
     def subscribe_events(self, node, handler):
         if not self._event_sub:
-            print("subscirbing with handler: ", handler, dir(handler))
             self._event_sub = self.client.create_subscription(500, handler)
         handle = self._event_sub.subscribe_events(node)
         self._subs_ev[node.nodeid] = handle

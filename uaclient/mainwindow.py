@@ -5,10 +5,10 @@ import sys
 from datetime import datetime
 import logging
 
-from PyQt5.QtCore import pyqtSignal, QFile, QTimer, Qt, QObject, QSettings, QTextStream, QItemSelection, \
+from PyQt6.QtCore import pyqtSignal, QFile, QTimer, Qt, QObject, QSettings, QTextStream, QItemSelection, \
     QCoreApplication
-from PyQt5.QtGui import QStandardItemModel, QStandardItem, QIcon
-from PyQt5.QtWidgets import QMainWindow, QMessageBox, QWidget, QApplication, QMenu, QDialog
+from PyQt6.QtGui import QStandardItemModel, QStandardItem, QIcon
+from PyQt6.QtWidgets import QMainWindow, QMessageBox, QWidget, QApplication, QMenu, QDialog, QHeaderView
 
 from uaclient.theme import breeze_resources
 
@@ -68,7 +68,7 @@ class EventUI(object):
         self.window.addAction(self.window.ui.actionSubscribeEvent)
         self.window.addAction(self.window.ui.actionUnsubscribeEvents)
         self.window.addAction(self.window.ui.actionAddToGraph)
-        self._handler.event_fired.connect(self._update_event_model, type=Qt.QueuedConnection)
+        self._handler.event_fired.connect(self._update_event_model, type=Qt.ConnectionType.QueuedConnection)
 
         # accept drops
         self.model.canDropMimeData = self.canDropMimeData
@@ -131,7 +131,7 @@ class DataChangeUI(object):
         self._subscribed_nodes = []
         self.model = QStandardItemModel()
         self.window.ui.subView.setModel(self.model)
-        self.window.ui.subView.horizontalHeader().setSectionResizeMode(1)
+        self.window.ui.subView.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
 
         self.window.ui.actionSubscribeDataChange.triggered.connect(self._subscribe)
         self.window.ui.actionUnsubscribeDataChange.triggered.connect(self._unsubscribe)
@@ -141,7 +141,7 @@ class DataChangeUI(object):
         self.window.addAction(self.window.ui.actionUnsubscribeDataChange)
 
         # handle subscriptions
-        self._subhandler.data_change_fired.connect(self._update_subscription_model, type=Qt.QueuedConnection)
+        self._subhandler.data_change_fired.connect(self._update_subscription_model, type=Qt.ConnectionType.QueuedConnection)
 
         # accept drops
         self.model.canDropMimeData = self.canDropMimeData
@@ -169,7 +169,7 @@ class DataChangeUI(object):
             if node is None:
                 return
         if node in self._subscribed_nodes:
-            logger.warning("allready subscribed to node: %s ", node)
+            logger.warning("already subscribed to node: %s ", node)
             return
         self.model.setHorizontalHeaderLabels(["DisplayName", "Value", "Timestamp"])
         text = str(node.read_display_name().Text)
@@ -198,7 +198,8 @@ class DataChangeUI(object):
             item = self.model.item(i)
             if item.data() == node:
                 self.model.removeRow(i)
-            i += 1
+            else:
+                i += 1
 
     def _update_subscription_model(self, node, value, timestamp):
         i = 0
@@ -238,7 +239,6 @@ class Window(QMainWindow):
         self.settings = QSettings()
 
         self._address_list = self.settings.value("address_list", ["opc.tcp://localhost:4840", "opc.tcp://localhost:53530/OPCUA/SimulationServer/"])
-        print("ADR", self._address_list)
         self._address_list_max_count = int(self.settings.value("address_list_max_count", 10))
 
         # init widgets
@@ -296,7 +296,7 @@ class Window(QMainWindow):
         dia.security_policy = self.uaclient.security_policy
         dia.certificate_path = self.uaclient.user_certificate_path
         dia.private_key_path = self.uaclient.user_private_key_path
-        ret = dia.exec_()
+        ret = dia.exec()
         if ret:
             self.uaclient.security_mode = dia.security_mode
             self.uaclient.security_policy = dia.security_policy
@@ -307,8 +307,8 @@ class Window(QMainWindow):
         dia = ApplicationCertificateDialog(self)
         dia.certificate_path = self.uaclient.application_certificate_path
         dia.private_key_path = self.uaclient.application_private_key_path
-        ret = dia.exec_()
-        if ret == QDialog.Accepted:
+        ret = dia.exec()
+        if ret == QDialog.DialogCode.Accepted:
             self.uaclient.application_certificate_path = dia.certificate_path
             self.uaclient.application_private_key_path = dia.private_key_path
         self.uaclient.save_application_certificate_settings()
@@ -334,7 +334,7 @@ class Window(QMainWindow):
             self.attrs_ui.show_attrs(node)
 
     def show_error(self, msg):
-        logger.warning("showing error: %s")
+        logger.warning("showing error: %s", msg)
         self.ui.statusBar.show()
         self.ui.statusBar.setStyleSheet("QStatusBar { background-color : red; color : black; }")
         self.ui.statusBar.showMessage(str(msg))
@@ -417,7 +417,7 @@ class Window(QMainWindow):
             self.tree_ui.expand_to_node(node)
 
     def setup_context_menu_tree(self):
-        self.ui.treeView.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.ui.treeView.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.ui.treeView.customContextMenuRequested.connect(self._show_context_menu_tree)
         self._contextMenu = QMenu()
         self.addAction(self.ui.actionCopyPath)
@@ -440,7 +440,7 @@ class Window(QMainWindow):
     def _show_context_menu_tree(self, position):
         node = self.tree_ui.get_current_node()
         if node:
-            self._contextMenu.exec_(self.ui.treeView.viewport().mapToGlobal(position))
+            self._contextMenu.exec(self.ui.treeView.viewport().mapToGlobal(position))
 
     def call_method(self):
         node = self.get_current_node()
@@ -451,9 +451,9 @@ class Window(QMainWindow):
         self.settings.setValue("dark_mode", self.ui.actionDark_Mode.isChecked())
 
         msg = QMessageBox()
-        msg.setIcon(QMessageBox.Information)
+        msg.setIcon(QMessageBox.Icon.Information)
         msg.setText("Restart for changes to take effect")
-        msg.exec_()
+        msg.exec()
 
 
 def main():
@@ -468,12 +468,12 @@ def main():
     # set stylesheet
     if (QSettings().value("dark_mode", "false") == "true"):
         file = QFile(":/dark.qss")
-        file.open(QFile.ReadOnly | QFile.Text)
+        file.open(QFile.OpenModeFlag.ReadOnly | QFile.OpenModeFlag.Text)
         stream = QTextStream(file)
         app.setStyleSheet(stream.readAll())
 
     client.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
 
 if __name__ == "__main__":

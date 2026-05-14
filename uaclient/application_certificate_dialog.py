@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QDialog, QFileDialog
+from PyQt6.QtWidgets import QDialog, QFileDialog
 
 from uaclient.applicationcertificate_ui import Ui_ApplicationCertificateDialog
 

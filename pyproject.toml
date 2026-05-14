@@ -1,14 +1,16 @@
 [project]
 name = "opcua-client"
-version = "0.8.4"
+version = "0.9.0"
 description = "OPC-UA Client GUI"
 authors = [{ name = "Olivier R-D" }]
 license = { text = "GNU General Public License" }
-requires-python = ">=3.9"
+requires-python = ">=3.14"
 dependencies = [
-    "asyncua",
-    "opcua-widgets>=0.6.0",
-    "PyQt5",
+    "asyncua>=1.2b2",
+    "opcua-widgets>=0.7.0",
+    "PyQt6",
+    "pyqtgraph",
+    "numpy",
 ]
 
 [project.urls]
@@ -23,3 +25,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
 packages = ["uaclient", "uaclient.theme"]
+
+[tool.uv.sources]
+opcua-widgets = { path = "./uawidgets", editable = true }
+asyncua = { path = "../opcua-asyncio", editable = true }
