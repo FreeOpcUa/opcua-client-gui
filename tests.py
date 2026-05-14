@@ -1,5 +1,6 @@
 import sys
 import unittest
+from typing import Any
 
 from asyncua.sync import Server
 
@@ -10,7 +11,7 @@ from uaclient.mainwindow import Window
 
 
 class TestClient(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.server = Server()
         url = "opc.tcp://localhost:48400/freeopcua/server/"
         self.server.set_endpoint(url)
@@ -19,11 +20,11 @@ class TestClient(unittest.TestCase):
         self.client.ui.addrComboBox.setCurrentText(url)
         self.client.connect()
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         self.client.disconnect()
         self.server.stop()
 
-    def get_attr_value(self, text):
+    def get_attr_value(self, text: str) -> Any:
         idxlist = self.client.attrs_ui.model.match(
             self.client.attrs_ui.model.index(0, 0),
             Qt.ItemDataRole.DisplayRole, text, 1,
@@ -31,9 +32,10 @@ class TestClient(unittest.TestCase):
         idx = idxlist[0]
         idx = idx.sibling(idx.row(), 1)
         item = self.client.attrs_ui.model.itemFromIndex(idx)
+        assert item is not None
         return item.data(Qt.ItemDataRole.UserRole).value
 
-    def test_select_objects(self):
+    def test_select_objects(self) -> None:
         objects = self.server.nodes.objects
         self.client.tree_ui.expand_to_node(objects)
         self.assertEqual(objects, self.client.tree_ui.get_current_node())
@@ -43,7 +45,7 @@ class TestClient(unittest.TestCase):
         data = self.get_attr_value("NodeId")
         self.assertEqual(data, objects.nodeid)
 
-    def test_select_server_node(self):
+    def test_select_server_node(self) -> None:
         server_node = self.server.nodes.server
         self.client.tree_ui.expand_to_node(server_node)
         self.assertEqual(server_node, self.client.tree_ui.get_current_node())
@@ -57,5 +59,3 @@ class TestClient(unittest.TestCase):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     unittest.main()
-
-

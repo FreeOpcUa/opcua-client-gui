@@ -26,6 +26,34 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools]
 packages = ["uaclient", "uaclient.theme"]
 
+[dependency-groups]
+dev = ["mypy"]
+
 [tool.uv.sources]
 opcua-widgets = { path = "./uawidgets", editable = true }
 asyncua = { path = "../opcua-asyncio", editable = true }
+
+[tool.mypy]
+python_version = "3.14"
+strict = true
+disallow_subclassing_any = false
+disallow_untyped_calls = false
+disallow_any_generics = false
+warn_return_any = false
+mypy_path = "./uawidgets"
+exclude = "(^|/)(mainwindow_ui|connection_ui|applicationcertificate_ui|breeze_resources)\\.py$"
+
+[[tool.mypy.overrides]]
+module = ["asyncua.*", "pyqtgraph", "numpy"]
+ignore_missing_imports = true
+follow_imports = "skip"
+
+[[tool.mypy.overrides]]
+module = [
+    "uaclient.mainwindow_ui",
+    "uaclient.connection_ui",
+    "uaclient.applicationcertificate_ui",
+    "uaclient.theme.breeze_resources",
+    "uawidgets.resources",
+]
+follow_imports = "skip"
