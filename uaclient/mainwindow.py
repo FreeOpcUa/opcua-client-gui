@@ -424,6 +424,7 @@ class Window(QMainWindow):
         has_session = state in ("connected", "reconnecting")
 
         self.ui.connectButton.setEnabled(not has_session)
+        self.ui.connectOptionButton.setEnabled(not has_session)
         self.ui.actionConnect.setEnabled(not has_session)
         self.ui.disconnectButton.setEnabled(has_session)
         self.ui.actionDisconnect.setEnabled(has_session)
