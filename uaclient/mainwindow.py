@@ -335,6 +335,10 @@ class Window(QMainWindow):
         self.ui.actionClient_Application_Certificate.triggered.connect(self.show_application_certificate_dialog)
         self.ui.actionDark_Mode.triggered.connect(self.dark_mode)
 
+        self.uaclient.connection_state_changed.connect(
+            self._on_connection_state_changed, type=Qt.ConnectionType.QueuedConnection  # type: ignore[call-arg]
+        )
+
     def _uri_changed(self, uri: str) -> None:
         self.uaclient.load_security_settings(uri)
 
@@ -387,6 +391,28 @@ class Window(QMainWindow):
         self.ui.statusBar.setStyleSheet("QStatusBar { background-color : red; color : black; }")
         self.ui.statusBar.showMessage(str(msg))
         QTimer.singleShot(1500, self.ui.statusBar.hide)
+
+    def _on_connection_state_changed(self, state: str) -> None:
+        """Slot for UaClient.connection_state_changed; runs on the GUI thread."""
+        connected = state == "connected"
+        if connected:
+            logger.info("Connection re-established")
+            self.ui.statusBar.hide()
+        else:
+            logger.warning("Connection state: %s", state)
+            self.ui.statusBar.show()
+            self.ui.statusBar.setStyleSheet("QStatusBar { background-color : orange; color : black; }")
+            self.ui.statusBar.showMessage(f"Disconnected from server (state: {state}); auto-reconnect in progress…")
+        self._set_widgets_read_only(not connected)
+
+    def _set_widgets_read_only(self, read_only: bool) -> None:
+        self.attrs_ui.set_read_only(read_only)
+        self.refs_ui.set_read_only(read_only)
+        self.ui.actionCall.setEnabled(not read_only and self.ui.actionCall.isEnabled())
+        self.ui.actionSubscribeDataChange.setEnabled(not read_only)
+        self.ui.actionUnsubscribeDataChange.setEnabled(not read_only)
+        self.ui.actionSubscribeEvent.setEnabled(not read_only)
+        self.ui.actionUnsubscribeEvents.setEnabled(not read_only)
 
     def get_current_node(self, idx: QModelIndex | None = None) -> SyncNode | None:
         return self.tree_ui.get_current_node(idx)

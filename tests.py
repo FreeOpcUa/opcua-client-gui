@@ -1,11 +1,12 @@
 import sys
+import time
 import unittest
 from typing import Any
 
 from asyncua.sync import Server
 
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QApplication
+from PyQt6.QtWidgets import QAbstractItemView, QApplication
 
 from uaclient.mainwindow import Window
 
@@ -54,6 +55,54 @@ class TestClient(unittest.TestCase):
 
         data = self.get_attr_value("NodeId")
         self.assertEqual(data, server_node.nodeid)
+
+
+class TestAutoReconnect(unittest.TestCase):
+    def setUp(self) -> None:
+        self.url = "opc.tcp://localhost:48401/freeopcua/server/"
+        self.server = Server()
+        self.server.set_endpoint(self.url)
+        self.server.start()
+        self.client = Window()
+        self.client.ui.addrComboBox.setCurrentText(self.url)
+        self.client.connect()
+
+    def tearDown(self) -> None:
+        self.client.disconnect()
+        try:
+            self.server.stop()
+        except Exception:
+            pass
+
+    def _pump(self, seconds: float) -> None:
+        app = QApplication.instance()
+        assert app is not None
+        end = time.time() + seconds
+        while time.time() < end:
+            app.processEvents()
+            time.sleep(0.05)
+
+    def test_widgets_go_read_only_when_server_dies(self) -> None:
+        edit_on = self.client.attrs_ui.view.editTriggers()
+        self.assertEqual(edit_on, QAbstractItemView.EditTrigger.DoubleClicked)
+
+        self.server.stop()
+        self._pump(5)
+
+        edit_off = self.client.attrs_ui.view.editTriggers()
+        self.assertEqual(edit_off, QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.assertIn("auto-reconnect", self.client.ui.statusBar.currentMessage())
+
+        # Re-bind the same port and verify the supervisor reconnects.
+        self.server = Server()
+        self.server.set_endpoint(self.url)
+        self.server.start()
+        self._pump(15)
+
+        self.assertEqual(
+            self.client.attrs_ui.view.editTriggers(),
+            QAbstractItemView.EditTrigger.DoubleClicked,
+        )
 
 
 if __name__ == "__main__":
