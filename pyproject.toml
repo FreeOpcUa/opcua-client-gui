@@ -6,7 +6,7 @@ authors = [{ name = "Olivier R-D" }]
 license = { text = "GNU General Public License" }
 requires-python = ">=3.14"
 dependencies = [
-    "asyncua>=1.2b2",
+    "asyncua>=2.0a0",
     "opcua-widgets>=0.7.0",
     "PyQt6",
     "pyqtgraph",

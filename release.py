@@ -1,40 +1,75 @@
+"""Release helper: bump version in pyproject.toml, tag, build and publish via uv."""
+
+from __future__ import annotations
+
 import re
-import os
+import shutil
+import subprocess
+import sys
+import tomllib
+from pathlib import Path
 
 
-def bump_version():
-    with open("setup.py") as f:
-        s = f.read()
-    m = re.search(r'version="(.*)\.(.*)\.(.*)",', s)
-    v1, v2, v3 = m.groups()
-    oldv = "{}.{}.{}".format(v1, v2, v3)
-    newv = "{}.{}.{}".format(v1, v2, str(int(v3) + 1))
-    print("Current version is: {}, write new version, ctrl-c to exit".format(oldv))
-    ans = input(newv)
-    if ans:
-        newv = ans
-    s = s.replace(oldv, newv)
-    with open("setup.py", "w") as f:
-        f.write(s)
-    return newv
+PYPROJECT = Path("pyproject.toml")
 
 
-def release():
+def read_version() -> str:
+    with PYPROJECT.open("rb") as f:
+        return tomllib.load(f)["project"]["version"]
+
+
+def write_version(new: str) -> None:
+    text = PYPROJECT.read_text()
+    new_text, n = re.subn(
+        r'^(version\s*=\s*")[^"]+(")',
+        rf"\g<1>{new}\g<2>",
+        text,
+        count=1,
+        flags=re.MULTILINE,
+    )
+    if n != 1:
+        sys.exit("could not locate version line in pyproject.toml")
+    PYPROJECT.write_text(new_text)
+
+
+def bump_version() -> str:
+    old = read_version()
+    parts = old.split(".")
+    if len(parts) != 3 or not parts[-1].isdigit():
+        sys.exit(f"non-trivial version {old!r}; bump manually")
+    suggested = f"{parts[0]}.{parts[1]}.{int(parts[-1]) + 1}"
+    print(f"Current version: {old}")
+    ans = input(f"new version [{suggested}]: ").strip()
+    new = ans or suggested
+    write_version(new)
+    return new
+
+
+def ask(prompt: str) -> bool:
+    return input(f"{prompt} (Y/n) ").strip().lower() in ("", "y", "yes")
+
+
+def run(*cmd: str) -> None:
+    print("$", " ".join(cmd))
+    subprocess.run(cmd, check=True)
+
+
+def release() -> None:
     v = bump_version()
-    ans = input("version bumped, commiting?(Y/n)")
-    if ans in ("", "y", "yes"):
-        os.system("git add setup.py")
-        os.system("git commit -m 'new release'")
-        os.system("git tag {}".format(v))
-        ans = input("change committed, push to server?(Y/n)")
-        if ans in ("", "y", "yes"):
-            os.system("git push")
-            os.system("git push --tags")
-        ans = input("upload to pip?(Y/n)")
-        if ans in ("", "y", "yes"):
-            os.system("rm -rf dist/*")
-            os.system("python setup.py sdist bdist_wheel")
-            os.system("twine upload dist/*")
+    if not ask("commit and tag?"):
+        return
+    run("git", "add", "pyproject.toml")
+    run("git", "commit", "-m", "new release")
+    run("git", "tag", v)
+    if ask("push to remote?"):
+        run("git", "push")
+        run("git", "push", "--tags")
+    if ask("publish to PyPI?"):
+        dist = Path("dist")
+        if dist.exists():
+            shutil.rmtree(dist)
+        run("uv", "build")
+        run("uv", "publish")
 
 
 if __name__ == "__main__":
