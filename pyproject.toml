@@ -7,7 +7,6 @@ license = { text = "GNU General Public License" }
 requires-python = ">=3.14"
 dependencies = [
     "asyncua>=2.0a0",
-    "opcua-widgets>=0.7.0",
     "PyQt6",
     "pyqtgraph",
     "numpy",
@@ -24,13 +23,15 @@ requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["uaclient", "uaclient.theme"]
+packages = ["uaclient", "uaclient.theme", "uawidgets"]
+
+[tool.setuptools.package-data]
+uawidgets = ["py.typed"]
 
 [dependency-groups]
 dev = ["mypy"]
 
 [tool.uv.sources]
-opcua-widgets = { path = "./uawidgets", editable = true }
 asyncua = { path = "../opcua-asyncio", editable = true }
 
 [tool.mypy]
@@ -40,8 +41,7 @@ disallow_subclassing_any = false
 disallow_untyped_calls = false
 disallow_any_generics = false
 warn_return_any = false
-mypy_path = "./uawidgets"
-exclude = "(^|/)(mainwindow_ui|connection_ui|applicationcertificate_ui|breeze_resources)\\.py$"
+exclude = "(^|/)(mainwindow_ui|connection_ui|applicationcertificate_ui|breeze_resources|resources)\\.py$"
 
 [[tool.mypy.overrides]]
 module = ["asyncua.*", "pyqtgraph", "numpy"]

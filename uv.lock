@@ -67,7 +67,7 @@ wheels = [
 
 [[package]]
 name = "asyncua"
-version = "1.2b2"
+version = "2.0a0"
 source = { editable = "../opcua-asyncio" }
 dependencies = [
     { name = "aiosqlite" },
@@ -324,7 +324,6 @@ source = { editable = "." }
 dependencies = [
     { name = "asyncua" },
     { name = "numpy" },
-    { name = "opcua-widgets" },
     { name = "pyqt6" },
     { name = "pyqtgraph" },
 ]
@@ -338,27 +337,8 @@ dev = [
 requires-dist = [
     { name = "asyncua", editable = "../opcua-asyncio" },
     { name = "numpy" },
-    { name = "opcua-widgets", editable = "uawidgets" },
     { name = "pyqt6" },
     { name = "pyqtgraph" },
-]
-
-[package.metadata.requires-dev]
-dev = [{ name = "mypy" }]
-
-[[package]]
-name = "opcua-widgets"
-version = "0.7.0"
-source = { editable = "uawidgets" }
-dependencies = [
-    { name = "asyncua" },
-    { name = "pyqt6" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "asyncua", editable = "../opcua-asyncio" },
-    { name = "pyqt6" },
 ]
 
 [package.metadata.requires-dev]

@@ -1,0 +1,20 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>copy.svg</file>
+    <file>paste.svg</file>
+    <file>delete.svg</file>
+    <file>new.svg</file>
+    <file>open.svg</file>
+    <file>save.svg</file>
+    <file>network.svg</file>
+    <file>folder.svg</file>
+    <file>object.svg</file>
+    <file>object_type.svg</file>
+    <file>property.svg</file>
+    <file>variable.svg</file>
+    <file>variable_type.svg</file>
+    <file>method.svg</file>
+    <file>reference_type.svg</file>
+    <file>data_type.svg</file>
+</qresource>
+</RCC>
