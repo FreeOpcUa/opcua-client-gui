@@ -1,6 +1,6 @@
 [project]
 name = "opcua-client"
-version = "0.9.0"
+version = "0.9.9"
 description = "OPC-UA Client GUI"
 authors = [{ name = "Olivier R-D" }]
 license = { text = "GNU General Public License" }
