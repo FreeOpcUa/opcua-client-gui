@@ -20,11 +20,12 @@ logger = logging.getLogger(__name__)
 
 
 class CallMethodDialog(QDialog):
-    def __init__(self, parent: QWidget | None, server: Any, node: SyncNode) -> None:
+    def __init__(self, parent: QWidget | None, server: Any, parent_node, method_node: SyncNode) -> None:
         QDialog.__init__(self, parent)
         self.setWindowTitle("UA Method Call")
         self.server = server
-        self.node = node
+        self.parent_node = parent_node
+        self.method_node = method_node
 
         self.vlayout = QVBoxLayout(self)
         self._top_layout = QHBoxLayout()
@@ -34,7 +35,7 @@ class CallMethodDialog(QDialog):
 
         self.vlayout.addWidget(QLabel("Input Arguments:", self))
         try:
-            inputs = node.get_child("0:InputArguments")
+            inputs = method_node.get_child("0:InputArguments")
             for arg in inputs.read_value():
                 self._add_input(arg)
         except ua.UaError:
@@ -48,7 +49,7 @@ class CallMethodDialog(QDialog):
 
         self.vlayout.addWidget(QLabel("Output Arguments:", self))
         try:
-            outputs = node.get_child("0:OutputArguments")
+            outputs = method_node.get_child("0:OutputArguments")
             for arg in outputs.read_value():
                 self._add_output(arg)
         except ua.UaError:
@@ -72,14 +73,13 @@ class CallMethodDialog(QDialog):
             self.result_label.setText(str(ex))
 
     def _call(self) -> None:
-        parent = self.node.get_parent()
         args = []
         for inp in self.inputs:
             data_type: SyncNode = inp.data_type  # type: ignore[attr-defined]
             val = string_to_variant(inp.text(), data_type_to_variant_type(data_type))
             args.append(val)
 
-        result = call_method_full(parent, self.node, *args)
+        result = call_method_full(self.parent_node, self.method_node, *args)
         self.result_label.setText(str(result.StatusCode))
 
         for idx, res in enumerate(result.OutputArguments):
