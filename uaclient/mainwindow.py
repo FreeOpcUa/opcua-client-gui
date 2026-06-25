@@ -214,7 +214,7 @@ class DataChangeUI:
 
     def clear(self) -> None:
         self._subscribed_nodes = []
-        self.model.clear()
+        self.model.setRowCount(0)
 
     def show_error(self, *args: Any) -> None:
         self.window.show_error(*args)
