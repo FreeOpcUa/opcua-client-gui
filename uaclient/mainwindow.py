@@ -174,6 +174,9 @@ class DataChangeUI:
         assert header is not None
         header.setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
 
+        self.window.ui.subView.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.window.ui.subView.customContextMenuRequested.connect(self.show_context_menu)
+
         self.window.ui.actionSubscribeDataChange.triggered.connect(self._subscribe)
         self.window.ui.actionUnsubscribeDataChange.triggered.connect(self._unsubscribe)
 
@@ -271,6 +274,26 @@ class DataChangeUI:
                     it_ts.setText(timestamp)
             i += 1
 
+    def show_context_menu(self, pos: QPoint) -> None:
+        selected_indexes = self.window.ui.subView.selectedIndexes()    
+        if not selected_indexes:
+            return
+        model = self.window.ui.subView.model()
+        selected_items = []
+        for idx in selected_indexes:
+            item = model.itemFromIndex(idx)
+            if item:
+                selected_items.append(item.data())
+        
+        menu = QMenu(self.window)
+        unsubscribe_action = menu.addAction("Unsubscribe")
+        unsubscribe_action.triggered.connect(lambda: self.batch_unsubscribe(selected_items))
+        
+        menu.exec(self.window.ui.subView.mapToGlobal(pos))
+
+    def batch_unsubscribe(self, nodes: List[SyncNode]):
+        for node in nodes:
+            self._unsubscribe(node)
 
 class Window(QMainWindow):
 
