@@ -464,6 +464,9 @@ class Window(QMainWindow):
     def get_current_node(self, idx: QModelIndex | None = None) -> SyncNode | None:
         return self.tree_ui.get_current_node(idx)
 
+    def get_parent_node(self, idx: QModelIndex | None = None) -> SyncNode | None:
+        return self.tree_ui.get_parent_node(idx)
+
     def get_uaclient(self) -> UaClient:
         return self.uaclient
 
@@ -573,8 +576,9 @@ class Window(QMainWindow):
         node = self.get_current_node()
         if node is None:
             return
+        parent = self.get_parent_node()
         assert self.uaclient.client is not None
-        dia = CallMethodDialog(self, self.uaclient.client, node)
+        dia = CallMethodDialog(self, self.uaclient.client, parent, node)
         dia.show()
 
     def dark_mode(self) -> None:
