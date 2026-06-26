@@ -183,11 +183,10 @@ class UaClient(QObject):
 
         if self.security_mode is not None and self.security_policy is not None:
             if not (self.application_certificate_path and self.application_private_key_path):
-                raise ValueError(
-                    "A secure endpoint requires a client application certificate and "
-                    "private key. Set them via Settings > Client Application Certificate "
-                    "before connecting."
+                self.application_certificate_path, self.application_private_key_path = (
+                    self.generate_application_certificate()
                 )
+                self.save_application_certificate_settings()
             # Endpoint policy URIs spell Aes policies with underscores
             # (Aes256_Sha256_RsaPss); the asyncua class name omits them.
             policy_class = 'SecurityPolicy' + self.security_policy.replace('_', '')
