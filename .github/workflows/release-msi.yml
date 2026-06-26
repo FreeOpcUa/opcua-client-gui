@@ -1,0 +1,40 @@
+name: Build Windows MSI
+
+on:
+  push:
+    tags:
+      - "*.*.*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-msi:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Create environment and install build deps
+        run: |
+          uv venv --python 3.14
+          uv pip install --prerelease=allow . cx_Freeze
+
+      - name: Build MSI
+        run: uv run --no-project python packaging/msi_setup.py bdist_msi
+
+      - name: Upload MSI as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: opcua-client-msi
+          path: dist/*.msi
+          if-no-files-found: error
+
+      - name: Attach MSI to the release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.msi
